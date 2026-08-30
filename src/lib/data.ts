@@ -280,5 +280,7 @@ export const MARQUEE = [
   "Hyla intermedia", "Rana temporaria", "Agalychnis callidryas", "Dendrobates tinctorius",
   "Litoria caerulea", "Phyllobates terribilis", "Pelophylax esculentus", "Rana dalmatina",
   "Bombina variegata", "Bufo bufo", "Dyscophus antongilii", "Pyxicephalus adspersus",
-  "Alytes obstetricans", "Rana latastei", "Rheobatrachus silus", "Incilius periglenes",
+  "Ambystoma mexicanum", "Proteus anguinus", "Andrias davidianus", "Salamandra salamandra",
+  "Necturus maculosus", "Siren lacertina", "Taricha granulosa", "Nasikabatrachus sahyadrensis",
+  "Theloderma corticale", "Pseudis paradoxa", "Barbourula kalimantanensis", "Salamandrina terdigitata",
 ];

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ARCHIVE, FAMILIES, REGIONS, STATUS_META, STATUS_ORDER, type IUCN } from "../lib/archive";
+import { ARCHIVE, FAMILIES, REGIONS, STATUS_META, STATUS_ORDER, type AmphibiaOrder, type IUCN } from "../lib/archive";
 import { SPECIES } from "../lib/data";
 import PlateImage from "./PlateImage";
 import { sceneFor } from "../lib/portraits";
@@ -7,14 +7,18 @@ import { Reveal, SectionHead } from "./ui";
 
 /* ---------- filtri ---------- */
 type SortKey = "nome" | "taglia" | "rischio";
+type OrderFilter = "Tutti" | AmphibiaOrder;
 
 export default function Archive() {
   const [q, setQ] = useState("");
   const [region, setRegion] = useState("Tutte");
   const [status, setStatus] = useState<"Tutte" | IUCN>("Tutte");
+  const [ordine, setOrdine] = useState<OrderFilter>("Tutti");
   const [sort, setSort] = useState<SortKey>("nome");
 
   const total = SPECIES.length + ARCHIVE.length;
+  const nUrodela = useMemo(() => ARCHIVE.filter((s) => s.order === "Urodela").length, []);
+  const nAnura = total - nUrodela;
 
   const statusCount = useMemo(() => {
     const m = new Map<IUCN, number>();
@@ -26,6 +30,7 @@ export default function Archive() {
     const needle = q.trim().toLowerCase();
     const list = ARCHIVE.filter(
       (s) =>
+        (ordine === "Tutti" || s.order === ordine) &&
         (region === "Tutte" || s.region === region) &&
         (status === "Tutte" || s.status === status) &&
         (needle === "" ||
@@ -42,9 +47,9 @@ export default function Archive() {
           ? b.sizeCm - a.sizeCm
           : riskRank[b.status] - riskRank[a.status]
     );
-  }, [q, region, status, sort]);
+  }, [q, region, status, ordine, sort]);
 
-  const hasFilters = q !== "" || region !== "Tutte" || status !== "Tutte";
+  const hasFilters = q !== "" || region !== "Tutte" || status !== "Tutte" || ordine !== "Tutti";
 
   return (
     <section id="archivio" className="relative scroll-mt-24 py-24 md:py-36 bg-pond/70 border-y border-leaf/40 overflow-hidden">
@@ -53,8 +58,8 @@ export default function Archive() {
         <SectionHead
           index="05"
           kicker="L'archivio"
-          title="Cento rane, un atlante"
-          sub={`Dieci schede di prima mano più ${ARCHIVE.length} ritratti. Le foto reali si scaricano DENTRO il sito con lo script «download_foto.py» (cartella public/images/specie): da quel momento si servono da lì, senza dipendenze esterne. Finché una foto non c'è, al suo posto una tavola illustrata SVG incorporata nel codice, con livrea e dettagli coerenti con la specie. Filtra per regione e stato, ordina per taglia o rischio.`}
+          title={`${total} anfibi, un solo atlante`}
+          sub={`${nAnura} Anura (rane e rospi) e ${nUrodela} Urodela (salamandre, tritoni, axolotl e altri caudati), con una predilezione per le forme più stravaganti: la rana senza polmoni, quella che rotola giù dai sassi, la sirena con due zampe sole, il tritone con le costole fuori posto. Le foto reali si scaricano dentro il sito con «download_foto.py»; altrimenti ogni specie ha la sua tavola SVG incorporata. Filtra per ordine, regione e stato, ordina per taglia o rischio.`}
         />
 
         {/* barra strumenti */}
@@ -72,7 +77,7 @@ export default function Archive() {
                   type="search"
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
-                  placeholder="Cerca per nome, specie o famiglia… es. «rana», «Dendrobates»"
+                  placeholder="Cerca per nome, specie o famiglia… es. «rana», «axolotl», «Salamandridae»"
                   className="w-full bg-ink/70 border border-leaf/60 focus:border-lime/70 outline-none pl-11 pr-4 py-3 text-sm text-foam placeholder:text-foam/30 transition-colors"
                 />
               </label>
@@ -92,6 +97,26 @@ export default function Archive() {
                   ))}
                 </div>
               </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-mono text-[10px] tracking-[0.22em] uppercase text-foam/35 mr-1">Ordine</span>
+              {([["Tutti", "Tutti"], ["Anura", "Rane e rospi"], ["Urodela", "Salamandre e tritoni"]] as [OrderFilter, string][]).map(([val, label]) => (
+                <button
+                  key={val}
+                  type="button"
+                  onClick={() => setOrdine(val)}
+                  className={`px-3 py-1.5 text-[12px] border transition-all ${
+                    ordine === val
+                      ? val === "Urodela"
+                        ? "border-water bg-water/15 text-water"
+                        : "border-lime bg-lime/15 text-lime"
+                      : "border-leaf/60 text-foam/55 hover:border-lime/50 hover:text-foam/85"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
@@ -153,13 +178,13 @@ export default function Archive() {
         <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
           <p className="font-mono text-xs text-foam/50" aria-live="polite">
             <span className="text-lime font-semibold text-sm">{filtered.length}</span> / {ARCHIVE.length} tavole in archivio ·{" "}
-            <span className="text-foam/70">{total} specie nell'atlante</span>
+            <span className="text-foam/70">{total} anfibi nell'atlante ({nAnura} Anura · {nUrodela} Urodela)</span>
             {FAMILIES.length > 0 && <> · {FAMILIES.length} famiglie</>}
           </p>
           {hasFilters && (
             <button
               type="button"
-              onClick={() => { setQ(""); setRegion("Tutte"); setStatus("Tutte"); }}
+              onClick={() => { setQ(""); setRegion("Tutte"); setStatus("Tutte"); setOrdine("Tutti"); }}
               className="font-mono text-[10px] tracking-[0.2em] uppercase text-rust border border-rust/50 px-3 py-1.5 hover:bg-rust hover:text-ink transition-colors"
             >
               × azzera filtri
@@ -185,8 +210,16 @@ export default function Archive() {
                     >
                       {sp.status}
                     </span>
+                    {sp.order === "Urodela" && (
+                      <span
+                        className="absolute top-2 left-2 z-10 font-mono text-[9px] tracking-[0.16em] uppercase bg-water/90 text-ink px-1.5 py-0.5"
+                        title="Ordine Urodela: salamandre e tritoni"
+                      >
+                        urodela
+                      </span>
+                    )}
                     <PlateImage
-                      sp={{ ...sp, scene: sceneFor(sp.region, sp.family) }}
+                      sp={{ ...sp, scene: sceneFor(sp.region, sp.family, sp.latin) }}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.06]"
                     />
                     <span className="absolute bottom-1.5 left-1.5 z-10 font-mono text-[8.5px] tracking-[0.14em] uppercase bg-ink/75 text-foam/60 px-1.5 py-0.5">
@@ -223,9 +256,9 @@ export default function Archive() {
               <line x1="56" y1="22" x2="50" y2="26" stroke="#4a6b3a" strokeWidth="2" strokeLinecap="round" />
               <path d="M36,44 Q44,40 52,44" fill="none" stroke="#4a6b3a" strokeWidth="2.2" strokeLinecap="round" />
             </svg>
-            <p className="mt-5 font-display italic font-bold text-2xl text-foam/70">Nessuna rana in questo punto dello stagno</p>
+            <p className="mt-5 font-display italic font-bold text-2xl text-foam/70">Nessun anfibio in questo punto dello stagno</p>
             <p className="mt-2 text-sm text-foam/45">
-              Prova con «rana», «rospo», una famiglia come «Hylidae» — oppure azzera i filtri.
+              Prova con «rana», «tritone», «salamandra», una famiglia come «Salamandridae» — oppure azzera i filtri.
             </p>
           </div>
         )}
