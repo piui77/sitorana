@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { CALLS, playCall } from "../lib/audio";
 import { SPECIES } from "../lib/data";
+import { portraitSrc } from "../lib/portraits";
 import { IconSound, Reveal, SectionHead } from "./ui";
 
 export default function Species() {
@@ -30,8 +31,8 @@ export default function Species() {
                 <article className="card-species group border border-leaf/60 bg-pond/50 overflow-hidden h-full flex flex-col">
                   <div className="relative aspect-[4/5] overflow-hidden">
                     <img
-                      src={sp.img}
-                      alt={sp.name}
+                      src={portraitSrc(sp)}
+                      alt={`Tavola di ${sp.name} (${sp.latin})`}
                       loading="lazy"
                       className="anim-kenburns w-full h-full object-cover"
                       style={{ animationDelay: `${-i * 3.1}s` }}
