@@ -191,7 +191,7 @@ export const STAGES: Stage[] = [
 
 /* ---------- numeri ---------- */
 export const STATS = [
-  { value: 7000, suffix: "+", label: "specie di anfibi descritte, quasi tutte rane e rospi (ordine Anura)" },
+  { value: 7400, suffix: "+", label: "specie di rane e rospi (ordine Anura): circa l'88% di tutti gli anfibi descritti" },
   { value: 41, suffix: "%", label: "delle specie di anfibi è minacciata di estinzione — il dato peggiore tra i vertebrati" },
   { value: 20, suffix: "×", label: "la lunghezza del corpo: il record di salto proporzionale tra i vertebrati" },
   { value: 500, suffix: "+", label: "specie colpite dal fungo chitridio, la più grave epidemia animale mai registrata" },
@@ -272,6 +272,7 @@ export const NAV = [
   { href: "#archivio", label: "Archivio" },
   { href: "#coro", label: "Coro notturno" },
   { href: "#conservazione", label: "Conservazione" },
+  { href: "#famiglia", label: "Famiglia" },
   { href: "#curiosita", label: "Curiosità" },
 ];
 

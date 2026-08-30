@@ -6,6 +6,7 @@ import Species from "./components/Species";
 import Archive from "./components/Archive";
 import SoundLab from "./components/SoundLab";
 import Conservation, { Numbers } from "./components/Conservation";
+import Orders from "./components/Orders";
 import { Curiosities, Footer } from "./components/Extras";
 import { FrogLogo, Marquee } from "./components/ui";
 import { MARQUEE, NAV } from "./lib/data";
@@ -85,6 +86,7 @@ export default function App() {
         <SoundLab />
         <Numbers />
         <Conservation />
+        <Orders />
 
         <div className="marquee border-y border-leaf/40 bg-pond/80">
           <Marquee items={[...MARQUEE].reverse()} reverse />
