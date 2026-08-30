@@ -1,9 +1,11 @@
-/* Archivio sistematico: 102 identikit, uno per ogni specie.
-   Ogni riga: [latino, nome italiano, famiglia, areale, taglia max (cm), stato IUCN, nota, colore 1, colore 2, sagoma, livrea]. */
+/* Archivio sistematico: un ritratto per ogni specie.
+   Ogni riga: [latino, nome italiano, famiglia, areale, taglia max (cm), stato IUCN, nota,
+               colore 1, colore 2, sagoma, livrea, ordine? (default "Anura")]. */
 
 export type IUCN = "LC" | "NT" | "VU" | "EN" | "CR" | "EX";
-export type FrogShape = "round" | "wide" | "slim";
+export type FrogShape = "round" | "wide" | "slim" | "caudata";
 export type FrogPattern = "spotted" | "mottled" | "striped" | "plain";
+export type AmphibiaOrder = "Anura" | "Urodela";
 
 export interface ArchiveSpecies {
   name: string;
@@ -17,6 +19,7 @@ export interface ArchiveSpecies {
   c2: string;
   shape: FrogShape;
   pattern: FrogPattern;
+  order: AmphibiaOrder;
 }
 
 export const STATUS_ORDER: IUCN[] = ["LC", "NT", "VU", "EN", "CR", "EX"];
@@ -35,7 +38,7 @@ export const REGIONS = [
   "Sudamerica", "Africa", "Madagascar", "Asia", "Oceania", "Caraibi",
 ];
 
-type Row = [string, string, string, string, number, IUCN, string, string, string, FrogShape, FrogPattern];
+type Row = [string, string, string, string, number, IUCN, string, string, string, FrogShape, FrogPattern, AmphibiaOrder?];
 
 const ROWS: Row[] = [
   // ——— Ranidae ———
@@ -156,6 +159,58 @@ const ROWS: Row[] = [
   ["Eleutherodactylus coqui", "Coquí di Portorico", "Eleutherodactylidae", "Caraibi", 4, "LC", "«Co-quí!» è la voce nazionale di Portorico: due note, un'isola intera.", "#8a7a48", "#c0b078", "slim", "plain"],
   ["Eleutherodactylus iberia", "Rana minuscola cubana", "Eleutherodactylidae", "Caraibi", 0.9, "LC", "Meno di un centimetro: tra i più piccoli vertebrati dell'emisfero nord.", "#8a7448", "#b8a470", "round", "plain"],
   ["Brachycephalus ephippium", "Rospo zucca", "Brachycephalidae", "Sudamerica", 1.8, "LC", "Arancio fluorescente grande come una monetina, con uno scudo osseo nel dorso.", "#e07020", "#3a2a18", "round", "plain"],
+  // ——— Gli strani: Anura fuori dal comune ———
+  ["Theloderma corticale", "Rana muschio del Vietnam", "Rhacophoridae", "Asia", 8, "EN", "Pelle che imita il muschio alla perfezione: vive appiccicata alle pareti delle grotte carsiche.", "#4a6a40", "#2e4a2e", "slim", "spotted"],
+  ["Nasikabatrachus sahyadrensis", "Rana viola", "Nasikabatrachidae", "Asia", 7, "EN", "Passa quasi l'anno sottoterra a mangiare termiti: emerge solo pochi giorni, gonfia e violetta.", "#8a6aa8", "#b8a0c8", "round", "plain"],
+  ["Lepidobatrachus laevis", "Rana di Budgett", "Ceratophryidae", "Sudamerica", 11, "NT", "Praticamente tutta bocca: il muso schiacciato la fa sembrare un personaggio dei cartoni.", "#6a7a48", "#c8b078", "wide", "striped"],
+  ["Trichobatrachus robustus", "Rana pelosa", "Arthroleptidae", "Africa", 13, "LC", "I «peli» del maschio sono filamenti di pelle per respirare; e ha artigli che escono dalle dita.", "#7a5c34", "#b8a068", "wide", "mottled"],
+  ["Barbourula kalimantanensis", "Rana senza polmoni del Borneo", "Bombinatoridae", "Asia", 8, "EN", "Unica rana al mondo senza polmoni: respira solo attraverso la pelle, in torrenti gelidi.", "#5a5a3e", "#a0a070", "slim", "mottled"],
+  ["Breviceps macrops", "Rana della pioggia del deserto", "Brevicipitidae", "Africa", 5, "VU", "Palla di gomma del deserto namibiano: si gonfia e stride come un giocattolo se minacciata.", "#b08858", "#d8b888", "round", "mottled"],
+  ["Pseudis paradoxa", "Rana paradosso", "Hylidae", "Sudamerica", 7, "LC", "Il girino misura 25 cm e l'adulto 7: crescendo si restringe, al contrario di tutti.", "#7a8a48", "#c0c880", "slim", "striped"],
+  ["Rhinophrynus dorsalis", "Rospo scavatore messicano", "Rhinophrynidae", "America Centrale", 8, "LC", "Naso a badile e strisce da pirata: passa la vita a ritroso, scavando all'indietro.", "#6a5a48", "#e0c890", "round", "striped"],
+  ["Litoria infrafrenata", "Raganella dal labbro bianco", "Hylidae", "Oceania", 13, "LC", "La raganella più grande del mondo: dieci centimetri di verde squillante con le labbra bianche.", "#58b050", "#e8f0e0", "slim", "plain"],
+  ["Rhacophorus nigropalmatus", "Rana volante di Wallace", "Rhacophoridae", "Asia", 10, "NT", "Dita palmate di nero come paracadute: plana da un albero all'altro per dieci metri.", "#5a8a3a", "#1e1e1e", "slim", "plain"],
+  ["Hymenochirus boettgeri", "Rana artigliata nana", "Pipidae", "Africa", 4, "LC", "Quattro centimetri, tutta acquatica: le dita terminano in veri artigli neri.", "#8a7a50", "#b0a070", "slim", "plain"],
+  ["Atelopus zeteki", "Rana dorata di Panama", "Bufonidae", "America Centrale", 6, "CR", "Non sente il proprio canto, quindi «saluta» i rivali sventolando le zampe: quasi svanita.", "#e8b818", "#2e2418", "slim", "plain"],
+  ["Oreophrynella nigra", "Rospo rotolante dei tepui", "Bufonidae", "Sudamerica", 2, "VU", "Vive sulle cime piatte dei tepui venezuelani: se fugge, si appallottola e rotola giù dai sassi.", "#3a3a32", "#6a6a58", "round", "plain"],
+  ["Cyclorana platycephala", "Rana serbatoio", "Hylidae", "Oceania", 6, "LC", "Quando piove si riempie d'acqua e si sigilla sottoterra: gli aborigeni la usavano come borraccia.", "#a89858", "#d0c088", "round", "plain"],
+  ["Hemiphractus proboscideus", "Rana marsupiale", "Hemiphractidae", "Sudamerica", 8, "LC", "La femmina porta i girini in una tasca sul dorso, nutriti da uova non fecondate.", "#7a6a40", "#c8a050", "wide", "mottled"],
+  ["Limnonectes larvaepartus", "Rana che partorisce", "Dicroglossidae", "Asia", 3, "NT", "Unica rana nota a partorire girini già formati: scoperta solo nel 2014, in Sulawesi.", "#6a6a3e", "#a8a068", "slim", "plain"],
+  ["Ecnomiohyla rabborum", "Rana arboricola di Rabbs", "Hylidae", "America Centrale", 10, "CR", "Il maschio faceva da «albero» ai girini: l'ultimo individuo noto è morto nel 2016.", "#7a8050", "#c0b070", "slim", "mottled"],
+  ["Litoria dayi", "Raganella delle cascate", "Hylidae", "Oceania", 7, "EN", "Vive attaccata alle rocce sotto le cascate del Queensland: il suo giro di boa si è rotto.", "#b08040", "#d8b878", "slim", "plain"],
+  ["Staurois natator", "Rana splash del Borneo", "Ranidae", "Asia", 6, "NT", "Vive sui torrenti: per farsi notare nel fragore dell'acqua sventola le zampe posteriori.", "#6a6a40", "#b0a870", "slim", "striped"],
+  ["Scaphiophryne gottlebei", "Rana arcobaleno scavatrice", "Microhylidae", "Madagascar", 4, "EN", "Un mosaico di cerchi rossi e verdi sul ventre bianco: il Madagascar ne ha poche centinaia.", "#d05038", "#e8d8c8", "round", "spotted"],
+  ["Melanophryniscus stelzneri", "Rospo dal ventre rosso", "Bufonidae", "Sudamerica", 4, "LC", "Se spaventato si rigira sulla schiena mostrando il ventre arancio: finge di essere già morto.", "#2e2e28", "#d86828", "round", "spotted"],
+  ["Leptodactylus fallax", "Pollo di montagna", "Leptodactylidae", "Caraibi", 20, "CR", "Gigante buono di Montserrat e Dominica: scava nidi di schiuma grandi come palloni.", "#8a6a3e", "#c8a868", "wide", "mottled"],
+  ["Heleophryne rosei", "Rana fantasma della Table Mountain", "Heleophrynidae", "Africa", 5, "CR", "Vive solo nei torrenti della Table Mountain, sopra Città del Capo: ne restano pochissime.", "#5a7a48", "#a8c080", "slim", "mottled"],
+  ["Assa darlingtoni", "Rana con la borsa", "Myobatrachidae", "Oceania", 2, "LC", "Due centimetri: il maschio cova i girini in due tasche sui fianchi finché non saltano fuori.", "#8a6a48", "#c0a878", "round", "plain"],
+  ["Rhinella proboscidea", "Rospo Pinocchio", "Bufonidae", "Sudamerica", 4, "LC", "Nella foga dell'accoppiamento i maschi si appendono al naso a uncino del rivale: è così che l'hanno scoperto.", "#8a7048", "#c0a870", "round", "mottled"],
+  ["Chacophrys pierottii", "Rana cornuta del Chaco", "Ceratophryidae", "Sudamerica", 7, "NT", "Sorella argentina delle rane cornute: aspetta le prede sepolta con solo gli occhi fuori.", "#8a7a48", "#c8b078", "wide", "mottled"],
+  ["Telmatobius macrostomus", "Rana del lago Junín", "Telmatobiidae", "Sudamerica", 15, "EN", "I girini restano girini per anni, giganti, nelle acque fredde del lago Junín a 4.000 metri.", "#6a7a48", "#a8b068", "wide", "mottled"],
+  ["Gracixalus supercornutus", "Raganella con le corna", "Rhacophoridae", "Asia", 4, "NT", "Escrescenze a corna su naso e occhi: una delle rane più bizzarre del Vietnam.", "#6a9a48", "#b8c870", "slim", "plain"],
+  // ——— Urodela: salamandre, tritoni e affini ———
+  ["Ambystoma mexicanum", "Axolotl", "Ambystomatidae", "America Centrale", 30, "CR", "L'eterno girino: non diventa mai adulto e rigenera arti, midollo e perfino pezzi di cuore.", "#c8b8a8", "#d87878", "caudata", "plain", "Urodela"],
+  ["Proteus anguinus", "Proteo, il «pesce umano»", "Proteidae", "Europa", 40, "VU", "Cieco, rosa e immortale quasi: vive 100 anni nelle grotte delle Alpi Dinariche senza mangiare per anni.", "#e8d0c8", "#c8a8a0", "caudata", "plain", "Urodela"],
+  ["Andrias davidianus", "Salamandra gigante cinese", "Cryptobranchidae", "Asia", 180, "CR", "Il più grande anfibio vivente: quasi due metri di «fossile vivente» nei fiumi cinesi.", "#7a6a50", "#5a4a38", "caudata", "mottled", "Urodela"],
+  ["Andrias japonicus", "Salamandra gigante giapponese", "Cryptobranchidae", "Asia", 150, "VU", "Cugina giapponese da un metro e mezzo: protetta come monumento naturale dal 1927.", "#8a6a48", "#6a5038", "caudata", "mottled", "Urodela"],
+  ["Cryptobranchus alleganiensis", "Hellbender", "Cryptobranchidae", "Nordamerica", 74, "NT", "«Lontra mocciosa» per gli americani: respira dalle pieghe della pelle nei fiumi appalachiani.", "#7a6848", "#a89868", "caudata", "mottled", "Urodela"],
+  ["Salamandra salamandra", "Salamandra pezzata", "Salamandridae", "Europa", 25, "LC", "Nera e gialla, partorisce nei ruscelli: in Italia è la regina dei boschi dopo la pioggia.", "#2a2a22", "#e8c828", "caudata", "spotted", "Urodela"],
+  ["Salamandrina terdigitata", "Salamandrina dagli occhiali", "Salamandridae", "Italia", 12, "LC", "Endemica dell'Appennino: piedi rossi, mascherina sugli occhi e quattro dita, unica al mondo.", "#2e2a24", "#d84838", "caudata", "plain", "Urodela"],
+  ["Salamandra atra", "Salamandra alpina", "Salamandridae", "Europa", 15, "LC", "Nera come la roccia delle Alpi: salta l'acqua e partorisce piccoli già formati, in quota.", "#1e1e1c", "#3a3a34", "caudata", "plain", "Urodela"],
+  ["Siren lacertina", "Grande sirena", "Sirenidae", "Nordamerica", 90, "LC", "Quasi un metro, solo le zampe davanti e branchie a ciuffo: un anfibio rimasto a metà.", "#8a8a70", "#a8a888", "caudata", "plain", "Urodela"],
+  ["Pseudobranchus striatus", "Sirena nana", "Sirenidae", "Nordamerica", 25, "LC", "Sorellina della grande sirena: un verme con le branchie degli stagni della Florida.", "#9a9070", "#b8a888", "caudata", "striped", "Urodela"],
+  ["Necturus maculosus", "Mudpuppy", "Proteidae", "Nordamerica", 40, "LC", "Branchie rosse a piuma che non perde mai: il «cucciolo di fango» dei laghi americani.", "#7a6a50", "#c86848", "caudata", "spotted", "Urodela"],
+  ["Pleurodeles waltl", "Tritone iberico", "Salamandridae", "Europa", 30, "NT", "Sotto stress le punte delle costole bucano la pelle senza ferirlo: poi tutto si richiude.", "#6a6a58", "#e0a038", "caudata", "spotted", "Urodela"],
+  ["Hydromantes strinatii", "Geotritone di Strinati", "Plethodontidae", "Italia", 14, "VU", "Senza polmoni e senza fase acquatica: vive nelle grotte liguri e lancia la lingua come un camaleonte.", "#9a8870", "#c0a888", "caudata", "plain", "Urodela"],
+  ["Amphiuma means", "Anfiuma", "Amphiumidae", "Nordamerica", 75, "LC", "Un'anguilla con quattro zampe minuscole e un morso da non sottovalutare: notti di palude.", "#3a3a34", "#5a5a50", "caudata", "plain", "Urodela"],
+  ["Taricha granulosa", "Tritone dalla pelle ruvida", "Salamandridae", "Nordamerica", 22, "LC", "Contiene tetrodotossina, il veleno del pesce palla: un tritone basta per dieci predatori.", "#6a6050", "#e08838", "caudata", "plain", "Urodela"],
+  ["Ensatina eschscholtzii", "Ensatina", "Plethodontidae", "Nordamerica", 14, "LC", "Il caso da manuale di «specie ad anello»: gira attorno alla valle e ai due capi non si riconosce più.", "#c08840", "#e0b878", "caudata", "spotted", "Urodela"],
+  ["Triturus carnifex", "Tritone crestato italiano", "Salamandridae", "Italia", 16, "LC", "In primavera il maschio sfoggia una cresta da drago con dentellature bianche e nere.", "#4a4a3a", "#e08838", "caudata", "striped", "Urodela"],
+  ["Ichthyosaura alpestris", "Tritone alpestre", "Salamandridae", "Europa", 12, "LC", "In amore il maschio diventa azzurro cielo con macchie nere: il più elegante degli stagni alpini.", "#3a5a8a", "#e07838", "caudata", "plain", "Urodela"],
+  ["Ambystoma andersoni", "Salamandra di Anderson", "Ambystomatidae", "America Centrale", 25, "CR", "Branchie rosse a piuma che non riassorbe mai: vive in un solo lago messicano, Zacapu.", "#5a5a52", "#d06858", "caudata", "spotted", "Urodela"],
+  ["Onychodactylus japonicus", "Salamandra artigliata giapponese", "Hynobiidae", "Asia", 17, "LC", "Artigli veri, coda prensile e branchie da giovane: vive nei torrenti gelidi delle montagne.", "#a88048", "#3a2e22", "caudata", "spotted", "Urodela"],
+  ["Mertensiella luschani", "Salamandra di Licia", "Salamandridae", "Asia", 17, "EN", "Relitto del Mediterraneo orientale: partorisce piccoli già formati sui monti della Turchia.", "#2e2a22", "#e0a838", "caudata", "spotted", "Urodela"],
+  ["Hemidactylium scutatum", "Salamandra a quattro dita", "Plethodontidae", "Nordamerica", 9, "LC", "Stacca la coda che continua a ballare per distrarre i predatori: ricresce, quasi sempre storta.", "#9a7850", "#c8a878", "caudata", "plain", "Urodela"],
 ];
 
 export const ARCHIVE: ArchiveSpecies[] = ROWS.map((r) => ({
@@ -170,6 +225,7 @@ export const ARCHIVE: ArchiveSpecies[] = ROWS.map((r) => ({
   c2: r[8],
   shape: r[9],
   pattern: r[10],
+  order: r[11] ?? "Anura",
 }));
 
 export const FAMILIES: string[] = [...new Set(ARCHIVE.map((s) => s.family))].sort((a, b) =>

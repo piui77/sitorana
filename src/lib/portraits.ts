@@ -1,14 +1,17 @@
 /*
  * Tavole d'atlante: ritratti SVG generati nel sito, senza alcuna risorsa esterna.
- * Ogni specie ottiene una scena ambientale e una livrea deterministiche
- * (seme = nome latino), con dettagli anatomici coerenti con la famiglia:
- * pupille orizzontali per i rospi, verticali per le raganelle, dischi adesivi
- * per le arboricole, zampe palmate per le acquatiche.
+ * Due famiglie di sagome: rane (round / wide / slim) e urodeli (caudata, con coda,
+ * zampe corte ed eventuali branchie esterne). Ogni specie ottiene una scena
+ * ambientale coerente (palude, foresta, torrente, savana, giardino, grotta)
+ * e una livrea deterministica (seme = nome latino), con dettagli anatomici
+ * legati alla famiglia: pupille orizzontali per rospi e salamandre, verticali
+ * per le raganelle, dischi adesivi per le arboricole, zampe palmate per le
+ * acquatiche, branchie a ciuffo per gli urodeli neotenici.
  */
 
 export type Pattern = "plain" | "spotted" | "mottled" | "striped";
-export type Shape = "round" | "wide" | "slim";
-export type Scene = "palude" | "foresta" | "torrente" | "savana" | "giardino";
+export type Shape = "round" | "wide" | "slim" | "caudata";
+export type Scene = "palude" | "foresta" | "torrente" | "savana" | "giardino" | "grotta";
 
 export interface PortraitSpec {
   latin: string;
@@ -53,15 +56,29 @@ const ARBOREALI = new Set([
   "Hylidae", "Dendrobatidae", "Mantellidae", "Rhacophoridae", "Centrolenidae",
   "Hyperoliidae", "Eleutherodactylidae", "Phyllomedusidae", "Microhylidae",
 ]);
-const ACQUATICHE = new Set(["Ranidae", "Pipidae", "Myobatrachidae", "Pelodytidae"]);
+const ACQUATICHE = new Set([
+  "Ranidae", "Pipidae", "Myobatrachidae", "Pelodytidae",
+  "Cryptobranchidae", "Proteidae", "Sirenidae", "Amphiumidae", "Ambystomatidae",
+]);
+const BRANCHIE = new Set(["Ambystomatidae", "Proteidae", "Sirenidae"]);
 
 const SHAPES = {
   round: { rx: 112, ry: 84, hx: 288, hy: 148, hr: 55, er: 18, pupil: "h" as const },
   wide: { rx: 130, ry: 76, hx: 298, hy: 154, hr: 60, er: 20, pupil: "h" as const },
   slim: { rx: 140, ry: 56, hx: 304, hy: 164, hr: 44, er: 15, pupil: "v" as const },
+  caudata: { rx: 148, ry: 30, hx: 372, hy: 212, hr: 27, er: 8.5, pupil: "h" as const },
 };
 
-export function sceneFor(region: string, family: string): Scene {
+export function sceneFor(region: string, family: string, latin = ""): Scene {
+  /* urodeli */
+  if (family === "Proteidae" || latin.startsWith("Hydromantes")) return "grotta";
+  if (family === "Cryptobranchidae" || family === "Sirenidae" || family === "Amphiumidae") return "torrente";
+  if (family === "Ambystomatidae") return "palude";
+  if (family === "Plethodontidae") return "foresta";
+  if (family === "Salamandridae") {
+    return /^(Triturus|Ichthyosaura|Pleurodeles|Notophthalmus|Cynops)/.test(latin) ? "palude" : "foresta";
+  }
+  /* anuri */
   if (family === "Pipidae" || family === "Ranidae" || family === "Leptodactylidae") return "palude";
   if (family === "Centrolenidae" || family === "Cycloramphidae" || family === "Rhacophoridae") return "torrente";
   if (family === "Bufonidae" || family === "Myobatrachidae") return "giardino";
@@ -78,7 +95,27 @@ function sceneBg(scene: Scene, rnd: () => number, uid: string): string {
   const out: string[] = [];
   const W = 480;
 
-  if (scene === "palude") {
+  if (scene === "grotta") {
+    out.push(`<rect width="480" height="360" fill="url(#${uid}-bg)"/>`);
+    /* stalattiti */
+    for (let i = 0; i < 8; i++) {
+      const x = 16 + i * 60 + rnd() * 26, len = 46 + rnd() * 96, w = 9 + rnd() * 10;
+      out.push(`<path d="M${x - w},0 L${x + w},0 L${x},${len} Z" fill="#16202c" opacity="${0.6 + rnd() * 0.3}"/>`);
+      if (rnd() > 0.5) out.push(`<circle cx="${x}" cy="${len + 7 + rnd() * 20}" r="1.6" fill="#7fc8c8" opacity="0.35"/>`);
+    }
+    /* bagliori di minerali */
+    for (let i = 0; i < 16; i++) {
+      const cx = rnd() * W, cy = rnd() * 260, r = 4 + rnd() * 22;
+      out.push(`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${i % 3 ? "#7fc8c8" : "#b7e24a"}" opacity="${0.025 + rnd() * 0.06}"/>`);
+    }
+    /* specchio d'acqua con riflessi */
+    out.push(`<rect y="298" width="480" height="62" fill="url(#${uid}-water)"/>`);
+    for (let i = 0; i < 5; i++) {
+      const cx = 50 + rnd() * 380, cy = 316 + rnd() * 34;
+      out.push(`<ellipse cx="${cx}" cy="${cy}" rx="${24 + rnd() * 54}" ry="2.4" fill="#7fc8c8" opacity="${0.07 + rnd() * 0.1}"/>`);
+    }
+    out.push(`<circle cx="404" cy="70" r="110" fill="url(#${uid}-moon)"/>`);
+  } else if (scene === "palude") {
     out.push(`<rect width="480" height="360" fill="url(#${uid}-bg)"/>`);
     out.push(`<rect y="246" width="480" height="114" fill="url(#${uid}-water)"/>`);
     for (let i = 0; i < 6; i++) {
@@ -143,40 +180,94 @@ function sceneBg(scene: Scene, rnd: () => number, uid: string): string {
   return out.join("");
 }
 
+function bgStops(scene: Scene): string {
+  switch (scene) {
+    case "savana":
+      return `<stop offset="0" stop-color="#2e2210"/><stop offset="0.55" stop-color="#241a0c"/><stop offset="1" stop-color="#150f07"/>`;
+    case "torrente":
+      return `<stop offset="0" stop-color="#0e222a"/><stop offset="0.6" stop-color="#102a30"/><stop offset="1" stop-color="#0a1a1e"/>`;
+    case "giardino":
+      return `<stop offset="0" stop-color="#101f14"/><stop offset="0.6" stop-color="#152917"/><stop offset="1" stop-color="#0c1810"/>`;
+    case "grotta":
+      return `<stop offset="0" stop-color="#0b121e"/><stop offset="0.55" stop-color="#0e1824"/><stop offset="1" stop-color="#070b12"/>`;
+    default:
+      return `<stop offset="0" stop-color="#0e2118"/><stop offset="0.55" stop-color="#122b1c"/><stop offset="1" stop-color="#0b1a11"/>`;
+  }
+}
+
+/* ---------- livrea comune (ritagliata sulla sagoma) ---------- */
+function livrea(sp: PortraitSpec, S: (typeof SHAPES)[keyof typeof SHAPES], bodyCx: number, bodyCy: number, rnd: () => number, uid: string, dark: string, light: string): string {
+  const parts: string[] = [];
+  parts.push(`<g clip-path="url(#${uid}-clip)">`);
+  parts.push(`<ellipse cx="${bodyCx + 10}" cy="${bodyCy + S.ry * 0.42}" rx="${S.rx * 0.8}" ry="${S.ry * 0.5}" fill="${light}" opacity="0.22"/>`);
+  if (sp.pattern === "spotted") {
+    for (let i = 0; i < 26; i++) {
+      const x = bodyCx + (rnd() - 0.55) * S.rx * 1.9;
+      const y = bodyCy + (rnd() - 0.5) * S.ry * 1.8;
+      parts.push(`<circle cx="${x}" cy="${y}" r="${3.5 + rnd() * 9}" fill="${i % 3 ? dark : sp.c2}" opacity="${0.28 + rnd() * 0.28}"/>`);
+    }
+  } else if (sp.pattern === "mottled") {
+    for (let i = 0; i < 15; i++) {
+      const x = bodyCx + (rnd() - 0.55) * S.rx * 1.9;
+      const y = bodyCy + (rnd() - 0.5) * S.ry * 1.8;
+      parts.push(`<ellipse cx="${x}" cy="${y}" rx="${12 + rnd() * 22}" ry="${9 + rnd() * 16}" transform="rotate(${(rnd() - 0.5) * 70} ${x} ${y})" fill="${i % 2 ? sp.c2 : dark}" opacity="${0.16 + rnd() * 0.16}"/>`);
+    }
+  } else if (sp.pattern === "striped") {
+    for (let i = 0; i < 6; i++) {
+      const x = bodyCx - S.rx * 0.75 + i * (S.rx * 0.3) + rnd() * 12;
+      parts.push(`<path d="M${x},${bodyCy - S.ry} Q${x - 14},${bodyCy} ${x + 8},${bodyCy + S.ry}" stroke="${i % 2 ? sp.c2 : dark}" stroke-width="${6 + (i % 3) * 4}" fill="none" opacity="${0.3 + rnd() * 0.2}" stroke-linecap="round"/>`);
+    }
+  } else {
+    parts.push(`<path d="M${bodyCx - S.rx * 0.8},${bodyCy - S.ry * 0.5} Q${bodyCx},${bodyCy - S.ry * 0.95} ${S.hx - S.hr * 0.4},${S.hy - S.hr * 0.7}" stroke="${light}" stroke-width="4" fill="none" opacity="0.35" stroke-linecap="round"/>`);
+  }
+  if (sp.family === "Bufonidae") {
+    for (let i = 0; i < 34; i++) {
+      const x = bodyCx + (rnd() - 0.55) * S.rx * 1.85;
+      const y = bodyCy + (rnd() - 0.5) * S.ry * 1.75;
+      parts.push(`<circle cx="${x}" cy="${y}" r="${1.4 + rnd() * 2.2}" fill="${dark}" opacity="${0.35 + rnd() * 0.3}"/>`);
+    }
+  }
+  parts.push(`<rect x="${bodyCx - S.rx - 10}" y="${S.hy - S.hr - 10}" width="${S.rx * 2 + 20}" height="${bodyCy + S.ry - S.hy + S.hr + 20}" filter="url(#${uid}-grain)" opacity="0.16"/>`);
+  parts.push(`</g>`);
+  return parts.join("");
+}
+
+/* ---------- occhio ---------- */
+function occhio(x: number, y: number, er: number, c2: string, dark: string, vertical: boolean): string {
+  const p = vertical
+    ? `<ellipse cx="${x}" cy="${y}" rx="${er * 0.22}" ry="${er * 0.62}" fill="#0c1410"/>`
+    : `<ellipse cx="${x}" cy="${y}" rx="${er * 0.6}" ry="${er * 0.22}" fill="#0c1410"/>`;
+  return (
+    `<circle cx="${x}" cy="${y}" r="${er}" fill="${c2}" stroke="${dark}" stroke-width="2.6"/>` +
+    `<circle cx="${x}" cy="${y}" r="${er * 0.82}" fill="${shade(c2, -30)}"/>` +
+    p +
+    `<circle cx="${x - er * 0.3}" cy="${y - er * 0.34}" r="${er * 0.18}" fill="#f4f7ea" opacity="0.9"/>`
+  );
+}
+
 /* ---------- la tavola ---------- */
 export function portraitSvg(sp: PortraitSpec): string {
   const seed = hashStr(sp.latin);
   const rnd = mulberry32(seed);
   const uid = `p${seed.toString(36)}`;
   const S = SHAPES[sp.shape];
-  const scene = sp.scene ?? sceneFor("", sp.family);
+  const scene = sp.scene ?? sceneFor("", sp.family, sp.latin);
 
   const dark = shade(sp.c1, -58);
   const light = shade(sp.c1, 44);
   const mid = shade(sp.c1, 14);
 
-  const bodyCx = 240, bodyCy = 218;
+  const bodyCx = 240, bodyCy = sp.shape === "caudata" ? 236 : 218;
   const pads = ARBOREALI.has(sp.family);
   const webbed = ACQUATICHE.has(sp.family);
-  const warty = sp.family === "Bufonidae";
 
   const parts: string[] = [];
 
   /* defs */
   parts.push(`<defs>`);
+  parts.push(`<linearGradient id="${uid}-bg" x1="0" y1="0" x2="0" y2="1">${bgStops(scene)}</linearGradient>`);
   parts.push(
-    `<linearGradient id="${uid}-bg" x1="0" y1="0" x2="0" y2="1">` +
-      (scene === "savana"
-        ? `<stop offset="0" stop-color="#2e2210"/><stop offset="0.55" stop-color="#241a0c"/><stop offset="1" stop-color="#150f07"/>`
-        : scene === "torrente"
-          ? `<stop offset="0" stop-color="#0e222a"/><stop offset="0.6" stop-color="#102a30"/><stop offset="1" stop-color="#0a1a1e"/>`
-          : scene === "giardino"
-            ? `<stop offset="0" stop-color="#101f14"/><stop offset="0.6" stop-color="#152917"/><stop offset="1" stop-color="#0c1810"/>`
-            : `<stop offset="0" stop-color="#0e2118"/><stop offset="0.55" stop-color="#122b1c"/><stop offset="1" stop-color="#0b1a11"/>`) +
-    `</linearGradient>`
-  );
-  parts.push(
-    `<linearGradient id="${uid}-water" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#16382a"/><stop offset="1" stop-color="#0b1d14"/></linearGradient>`
+    `<linearGradient id="${uid}-water" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${scene === "grotta" ? "#122434" : "#16382a"}"/><stop offset="1" stop-color="${scene === "grotta" ? "#091220" : "#0b1d14"}"/></linearGradient>`
   );
   parts.push(
     `<radialGradient id="${uid}-moon" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="${scene === "savana" ? "#f0a32b" : "#d8f57e"}" stop-opacity="0.14"/><stop offset="1" stop-color="${scene === "savana" ? "#f0a32b" : "#d8f57e"}" stop-opacity="0"/></radialGradient>`
@@ -203,109 +294,127 @@ export function portraitSvg(sp: PortraitSpec): string {
   parts.push(sceneBg(scene, rnd, uid));
 
   /* ombra a terra */
-  parts.push(`<ellipse cx="238" cy="${bodyCy + S.ry + 16}" rx="${S.rx * 1.05}" ry="15" fill="#000" opacity="0.42"/>`);
+  parts.push(`<ellipse cx="${bodyCx - 10}" cy="${bodyCy + S.ry + 14}" rx="${S.rx * 1.12}" ry="13" fill="#000" opacity="0.42"/>`);
 
-  /* zampa posteriore ripiegata */
-  const legX = bodyCx - S.rx * 0.72, legY = bodyCy + S.ry * 0.16;
-  parts.push(
-    `<ellipse cx="${legX}" cy="${legY}" rx="${S.rx * 0.48}" ry="${S.ry * 0.52}" transform="rotate(-18 ${legX} ${legY})" fill="${shade(sp.c1, -34)}" stroke="${dark}" stroke-width="2.5"/>`
-  );
-  /* piede posteriore con eventuali membrane */
-  const fx = bodyCx - S.rx * 0.98, fy = bodyCy + S.ry * 0.72;
-  if (webbed) {
-    parts.push(`<path d="M${fx + 8},${fy - 6} L${fx - 40},${fy + 16} L${fx - 26},${fy + 30} L${fx - 6},${fy + 34} L${fx + 10},${fy + 26} Z" fill="${shade(sp.c1, -44)}" opacity="0.85"/>`);
-  }
-  parts.push(
-    `<path d="M${fx + 6},${fy - 4} L${fx - 42},${fy + 14} M${fx + 8},${fy + 2} L${fx - 30},${fy + 30} M${fx + 10},${fy + 8} L${fx - 6},${fy + 34}" stroke="${shade(sp.c1, -40)}" stroke-width="7" stroke-linecap="round" fill="none"/>`
-  );
-
-  /* corpo + testa */
-  parts.push(`<g>`);
-  parts.push(`<ellipse cx="${bodyCx}" cy="${bodyCy}" rx="${S.rx}" ry="${S.ry}" fill="url(#${uid}-body)" stroke="${dark}" stroke-width="3"/>`);
-  parts.push(`<circle cx="${S.hx}" cy="${S.hy}" r="${S.hr}" fill="url(#${uid}-head)" stroke="${dark}" stroke-width="3"/>`);
-
-  /* livrea (ritagliata sulla sagoma) */
-  parts.push(`<g clip-path="url(#${uid}-clip)">`);
-  parts.push(`<ellipse cx="${bodyCx + 10}" cy="${bodyCy + S.ry * 0.42}" rx="${S.rx * 0.8}" ry="${S.ry * 0.5}" fill="${light}" opacity="0.22"/>`);
-  if (sp.pattern === "spotted") {
-    for (let i = 0; i < 26; i++) {
-      const x = bodyCx + (rnd() - 0.55) * S.rx * 1.9;
-      const y = bodyCy + (rnd() - 0.5) * S.ry * 1.8;
-      parts.push(`<circle cx="${x}" cy="${y}" r="${3.5 + rnd() * 9}" fill="${i % 3 ? dark : sp.c2}" opacity="${0.28 + rnd() * 0.28}"/>`);
+  if (sp.shape === "caudata") {
+    /* ===== urodelo: coda, corpo lungo, quattro zampe corte ===== */
+    const tailDark = shade(sp.c1, -34);
+    /* coda con pinna */
+    parts.push(
+      `<path d="M${bodyCx - S.rx + 12},${bodyCy - 10} C${bodyCx - S.rx - 52},${bodyCy - 26} ${bodyCx - S.rx - 84},${bodyCy - 74} ${bodyCx - S.rx - 76},${bodyCy - 118} C${bodyCx - S.rx - 62},${bodyCy - 74} ${bodyCx - S.rx - 22},${bodyCy - 6} ${bodyCx - S.rx + 12},${bodyCy + 20} Z" fill="url(#${uid}-body)" stroke="${dark}" stroke-width="2.6"/>`
+    );
+    if (webbed) {
+      parts.push(
+        `<path d="M${bodyCx - S.rx + 4},${bodyCy - 14} C${bodyCx - S.rx - 44},${bodyCy - 30} ${bodyCx - S.rx - 70},${bodyCy - 70} ${bodyCx - S.rx - 66},${bodyCy - 106}" stroke="${shade(sp.c1, 20)}" stroke-width="4" fill="none" opacity="0.5" stroke-linecap="round"/>`
+      );
     }
-  } else if (sp.pattern === "mottled") {
-    for (let i = 0; i < 15; i++) {
-      const x = bodyCx + (rnd() - 0.55) * S.rx * 1.9;
-      const y = bodyCy + (rnd() - 0.5) * S.ry * 1.8;
-      parts.push(`<ellipse cx="${x}" cy="${y}" rx="${12 + rnd() * 22}" ry="${9 + rnd() * 16}" transform="rotate(${(rnd() - 0.5) * 70} ${x} ${y})" fill="${i % 2 ? sp.c2 : dark}" opacity="${0.16 + rnd() * 0.16}"/>`);
+    /* zampe posteriori */
+    parts.push(
+      `<path d="M${bodyCx - S.rx * 0.62},${bodyCy + 20} q-6,18 -16,24 M${bodyCx - S.rx * 0.62 - 16},${bodyCy + 44} l-9,7 M${bodyCx - S.rx * 0.62 - 16},${bodyCy + 44} l0,11 M${bodyCx - S.rx * 0.62 - 16},${bodyCy + 44} l9,8" stroke="${tailDark}" stroke-width="6.5" fill="none" stroke-linecap="round"/>`
+    );
+    /* corpo */
+    parts.push(`<ellipse cx="${bodyCx}" cy="${bodyCy}" rx="${S.rx}" ry="${S.ry}" fill="url(#${uid}-body)" stroke="${dark}" stroke-width="3"/>`);
+    /* testa */
+    parts.push(`<circle cx="${S.hx}" cy="${S.hy}" r="${S.hr}" fill="url(#${uid}-head)" stroke="${dark}" stroke-width="3"/>`);
+    /* livrea */
+    parts.push(livrea(sp, S, bodyCx, bodyCy, rnd, uid, dark, light));
+    /* costolature laterali (salamandre) */
+    for (let i = 0; i < 7; i++) {
+      const x = bodyCx - S.rx * 0.6 + i * (S.rx * 0.2);
+      parts.push(`<path d="M${x},${bodyCy - S.ry * 0.5} q6,${S.ry * 0.5} 0,${S.ry}" stroke="${dark}" stroke-width="1.6" fill="none" opacity="0.35"/>`);
     }
-  } else if (sp.pattern === "striped") {
-    for (let i = 0; i < 6; i++) {
-      const x = bodyCx - S.rx * 0.75 + i * (S.rx * 0.3) + rnd() * 12;
-      parts.push(`<path d="M${x},${bodyCy - S.ry} Q${x - 14},${bodyCy} ${x + 8},${bodyCy + S.ry}" stroke="${i % 2 ? sp.c2 : dark}" stroke-width="${6 + (i % 3) * 4}" fill="none" opacity="${0.3 + rnd() * 0.2}" stroke-linecap="round"/>`);
+    /* zampe anteriori */
+    parts.push(
+      `<path d="M${bodyCx + S.rx * 0.58},${bodyCy + 22} q6,16 16,22 M${bodyCx + S.rx * 0.58 + 16},${bodyCy + 44} l-9,8 M${bodyCx + S.rx * 0.58 + 16},${bodyCy + 44} l0,11 M${bodyCx + S.rx * 0.58 + 16},${bodyCy + 44} l9,8" stroke="${tailDark}" stroke-width="6.5" fill="none" stroke-linecap="round"/>`
+    );
+    /* branchie esterne a ciuffo */
+    if (BRANCHIE.has(sp.family)) {
+      for (const [gx, gy, dir] of [
+        [S.hx - 6, S.hy - S.hr * 0.72, -1],
+        [S.hx + 8, S.hy - S.hr * 0.8, 1],
+      ] as [number, number, number][]) {
+        for (let i = 0; i < 3; i++) {
+          const a = -0.9 + i * 0.42;
+          const ex = gx + Math.sin(a) * 30 * dir, ey = gy - Math.cos(a) * 26 - i * 3;
+          parts.push(`<path d="M${gx},${gy} Q${(gx + ex) / 2 + dir * 4},${(gy + ey) / 2 - 8} ${ex},${ey}" stroke="#c05a4a" stroke-width="4.6" fill="none" stroke-linecap="round" opacity="0.95"/>`);
+          parts.push(`<circle cx="${ex}" cy="${ey}" r="2.6" fill="#e07a5a"/>`);
+        }
+      }
     }
+    /* riflesso sul dorso */
+    parts.push(
+      `<path d="M${bodyCx - S.rx * 0.7},${bodyCy - S.ry * 0.6} Q${bodyCx},${bodyCy - S.ry * 1.3} ${bodyCx + S.rx * 0.6},${bodyCy - S.ry * 0.55}" stroke="#f4f7ea" stroke-opacity="0.14" stroke-width="7" fill="none" stroke-linecap="round"/>`
+    );
+    /* occhi piccoli con pupilla orizzontale */
+    parts.push(occhio(S.hx - S.hr * 0.34, S.hy - S.hr * 0.42, S.er, sp.c2, dark, false));
+    parts.push(occhio(S.hx + S.hr * 0.4, S.hy - S.hr * 0.3, S.er, sp.c2, dark, false));
+    /* narici e bocca */
+    parts.push(`<circle cx="${S.hx + S.hr * 0.55}" cy="${S.hy - S.hr * 0.05}" r="1.8" fill="${dark}"/>`);
+    parts.push(
+      `<path d="M${S.hx + S.hr * 0.9},${S.hy + S.hr * 0.34} Q${S.hx + S.hr * 0.2},${S.hy + S.hr * 0.6} ${S.hx - S.hr * 0.5},${S.hy + S.hr * 0.52}" stroke="${dark}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`
+    );
   } else {
-    parts.push(`<path d="M${bodyCx - S.rx * 0.8},${bodyCy - S.ry * 0.5} Q${bodyCx},${bodyCy - S.ry * 0.95} ${S.hx - S.hr * 0.4},${S.hy - S.hr * 0.7}" stroke="${light}" stroke-width="4" fill="none" opacity="0.35" stroke-linecap="round"/>`);
-  }
-  if (warty) {
-    for (let i = 0; i < 34; i++) {
-      const x = bodyCx + (rnd() - 0.55) * S.rx * 1.85;
-      const y = bodyCy + (rnd() - 0.5) * S.ry * 1.75;
-      parts.push(`<circle cx="${x}" cy="${y}" r="${1.4 + rnd() * 2.2}" fill="${dark}" opacity="${0.35 + rnd() * 0.3}"/>`);
+    /* ===== anuro ===== */
+    /* zampa posteriore ripiegata */
+    const legX = bodyCx - S.rx * 0.72, legY = bodyCy + S.ry * 0.16;
+    parts.push(
+      `<ellipse cx="${legX}" cy="${legY}" rx="${S.rx * 0.48}" ry="${S.ry * 0.52}" transform="rotate(-18 ${legX} ${legY})" fill="${shade(sp.c1, -34)}" stroke="${dark}" stroke-width="2.5"/>`
+    );
+    /* piede posteriore con eventuali membrane */
+    const fx = bodyCx - S.rx * 0.98, fy = bodyCy + S.ry * 0.72;
+    if (webbed) {
+      parts.push(`<path d="M${fx + 8},${fy - 6} L${fx - 40},${fy + 16} L${fx - 26},${fy + 30} L${fx - 6},${fy + 34} L${fx + 10},${fy + 26} Z" fill="${shade(sp.c1, -44)}" opacity="0.85"/>`);
     }
-  }
-  /* grana della pelle */
-  parts.push(`<rect x="${bodyCx - S.rx - 10}" y="${S.hy - S.hr - 10}" width="${S.rx * 2 + 20}" height="${bodyCy + S.ry - S.hy + S.hr + 20}" filter="url(#${uid}-grain)" opacity="0.16"/>`);
-  parts.push(`</g>`);
+    parts.push(
+      `<path d="M${fx + 6},${fy - 4} L${fx - 42},${fy + 14} M${fx + 8},${fy + 2} L${fx - 30},${fy + 30} M${fx + 10},${fy + 8} L${fx - 6},${fy + 34}" stroke="${shade(sp.c1, -40)}" stroke-width="7" stroke-linecap="round" fill="none"/>`
+    );
 
-  /* riflesso sul dorso */
-  parts.push(
-    `<path d="M${bodyCx - S.rx * 0.55},${bodyCy - S.ry * 0.72} Q${bodyCx},${bodyCy - S.ry * 1.02} ${bodyCx + S.rx * 0.5},${bodyCy - S.ry * 0.66}" stroke="#f4f7ea" stroke-opacity="0.16" stroke-width="9" fill="none" stroke-linecap="round"/>`
-  );
+    /* corpo + testa */
+    parts.push(`<ellipse cx="${bodyCx}" cy="${bodyCy}" rx="${S.rx}" ry="${S.ry}" fill="url(#${uid}-body)" stroke="${dark}" stroke-width="3"/>`);
+    parts.push(`<circle cx="${S.hx}" cy="${S.hy}" r="${S.hr}" fill="url(#${uid}-head)" stroke="${dark}" stroke-width="3"/>`);
 
-  /* zampa anteriore */
-  const ax = S.hx - 4, ay = S.hy + S.hr * 0.62;
-  parts.push(`<path d="M${ax},${ay} Q${ax + 10},${ay + 34} ${ax + 22},${bodyCy + S.ry * 0.62}" stroke="${shade(sp.c1, -30)}" stroke-width="9" fill="none" stroke-linecap="round"/>`);
-  const tx = ax + 22, ty = bodyCy + S.ry * 0.62;
-  for (let i = 0; i < 3; i++) {
-    const ang = -0.5 + i * 0.5;
-    const exx = tx + Math.sin(ang) * 26 + 8, eyy = ty + Math.cos(ang) * 16 + 6;
-    parts.push(`<path d="M${tx},${ty} L${exx},${eyy}" stroke="${shade(sp.c1, -30)}" stroke-width="5.5" stroke-linecap="round"/>`);
-    if (pads) parts.push(`<circle cx="${exx + 1.5}" cy="${eyy + 1.5}" r="5.4" fill="${light}" stroke="${dark}" stroke-width="1.6"/>`);
-  }
+    /* livrea */
+    parts.push(livrea(sp, S, bodyCx, bodyCy, rnd, uid, dark, light));
 
-  /* timpano */
-  parts.push(`<circle cx="${S.hx - S.hr * 0.52}" cy="${S.hy + S.hr * 0.16}" r="${S.hr * 0.26}" fill="none" stroke="${dark}" stroke-width="2.4" opacity="0.6"/>`);
+    /* riflesso sul dorso */
+    parts.push(
+      `<path d="M${bodyCx - S.rx * 0.55},${bodyCy - S.ry * 0.72} Q${bodyCx},${bodyCy - S.ry * 1.02} ${bodyCx + S.rx * 0.5},${bodyCy - S.ry * 0.66}" stroke="#f4f7ea" stroke-opacity="0.16" stroke-width="9" fill="none" stroke-linecap="round"/>`
+    );
 
-  /* occhi */
-  const e1 = { x: S.hx - S.hr * 0.36, y: S.hy - S.hr * 0.68 };
-  const e2 = { x: S.hx + S.hr * 0.34, y: S.hy - S.hr * 0.56 };
-  for (const e of [e1, e2]) {
-    parts.push(`<circle cx="${e.x}" cy="${e.y}" r="${S.er}" fill="${sp.c2}" stroke="${dark}" stroke-width="2.6"/>`);
-    parts.push(`<circle cx="${e.x}" cy="${e.y}" r="${S.er * 0.82}" fill="${shade(sp.c2, -30)}"/>`);
-    if (S.pupil === "v") {
-      parts.push(`<ellipse cx="${e.x}" cy="${e.y}" rx="${S.er * 0.22}" ry="${S.er * 0.62}" fill="#0c1410"/>`);
-    } else {
-      parts.push(`<ellipse cx="${e.x}" cy="${e.y}" rx="${S.er * 0.6}" ry="${S.er * 0.22}" fill="#0c1410"/>`);
+    /* zampa anteriore */
+    const ax = S.hx - 4, ay = S.hy + S.hr * 0.62;
+    parts.push(`<path d="M${ax},${ay} Q${ax + 10},${ay + 34} ${ax + 22},${bodyCy + S.ry * 0.62}" stroke="${shade(sp.c1, -30)}" stroke-width="9" fill="none" stroke-linecap="round"/>`);
+    const tx = ax + 22, ty = bodyCy + S.ry * 0.62;
+    for (let i = 0; i < 3; i++) {
+      const ang = -0.5 + i * 0.5;
+      const exx = tx + Math.sin(ang) * 26 + 8, eyy = ty + Math.cos(ang) * 16 + 6;
+      parts.push(`<path d="M${tx},${ty} L${exx},${eyy}" stroke="${shade(sp.c1, -30)}" stroke-width="5.5" stroke-linecap="round"/>`);
+      if (pads) parts.push(`<circle cx="${exx + 1.5}" cy="${eyy + 1.5}" r="5.4" fill="${light}" stroke="${dark}" stroke-width="1.6"/>`);
     }
-    parts.push(`<circle cx="${e.x - S.er * 0.3}" cy="${e.y - S.er * 0.34}" r="${S.er * 0.18}" fill="#f4f7ea" opacity="0.9"/>`);
+
+    /* timpano */
+    parts.push(`<circle cx="${S.hx - S.hr * 0.52}" cy="${S.hy + S.hr * 0.16}" r="${S.hr * 0.26}" fill="none" stroke="${dark}" stroke-width="2.4" opacity="0.6"/>`);
+
+    /* occhi */
+    parts.push(occhio(S.hx - S.hr * 0.36, S.hy - S.hr * 0.68, S.er, sp.c2, dark, S.pupil === "v"));
+    parts.push(occhio(S.hx + S.hr * 0.34, S.hy - S.hr * 0.56, S.er, sp.c2, dark, S.pupil === "v"));
+
+    /* narici e bocca */
+    parts.push(`<circle cx="${S.hx + S.hr * 0.5}" cy="${S.hy - S.hr * 0.08}" r="2.3" fill="${dark}"/>`);
+    parts.push(`<circle cx="${S.hx + S.hr * 0.78}" cy="${S.hy + S.hr * 0.02}" r="2.3" fill="${dark}"/>`);
+    parts.push(
+      `<path d="M${S.hx + S.hr * 0.92},${S.hy + S.hr * 0.3} Q${S.hx + S.hr * 0.2},${S.hy + S.hr * 0.58} ${S.hx - S.hr * 0.55},${S.hy + S.hr * 0.5}" stroke="${dark}" stroke-width="2.8" fill="none" stroke-linecap="round"/>`
+    );
   }
 
-  /* narici e bocca */
-  parts.push(`<circle cx="${S.hx + S.hr * 0.5}" cy="${S.hy - S.hr * 0.08}" r="2.3" fill="${dark}"/>`);
-  parts.push(`<circle cx="${S.hx + S.hr * 0.78}" cy="${S.hy + S.hr * 0.02}" r="2.3" fill="${dark}"/>`);
-  parts.push(
-    `<path d="M${S.hx + S.hr * 0.92},${S.hy + S.hr * 0.3} Q${S.hx + S.hr * 0.2},${S.hy + S.hr * 0.58} ${S.hx - S.hr * 0.55},${S.hy + S.hr * 0.5}" stroke="${dark}" stroke-width="2.8" fill="none" stroke-linecap="round"/>`
-  );
-
-  /* vignettatura + controluce */
+  /* vignettatura */
   parts.push(`<rect width="480" height="360" fill="url(#${uid}-vig)"/>`);
 
-  /* foglie in primo piano sfuocate (profondità di campo) */
+  /* primo piano sfuocato (profondità di campo) */
   parts.push(
     `<g filter="url(#${uid}-blur)" opacity="0.75">` +
-      `<ellipse cx="26" cy="342" rx="120" ry="42" transform="rotate(-16 26 342)" fill="#08120b"/>` +
-      `<ellipse cx="462" cy="18" rx="110" ry="38" transform="rotate(-14 462 18)" fill="#08120b"/>` +
+      `<ellipse cx="26" cy="342" rx="120" ry="42" transform="rotate(-16 26 342)" fill="${scene === "grotta" ? "#0a1018" : "#08120b"}"/>` +
+      `<ellipse cx="462" cy="18" rx="110" ry="38" transform="rotate(-14 462 18)" fill="${scene === "grotta" ? "#0a1018" : "#08120b"}"/>` +
     `</g>`
   );
 
@@ -317,7 +426,7 @@ const uriCache = new Map<string, string>();
 export function portraitSrc(sp: PortraitSpec): string {
   let uri = uriCache.get(sp.latin);
   if (!uri) {
-    uri = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(portraitSvg(sp))}`;
+    uri = `image/svg+xml;charset=utf-8,${encodeURIComponent(portraitSvg(sp))}`;
     uriCache.set(sp.latin, uri);
   }
   return uri;
