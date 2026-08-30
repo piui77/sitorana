@@ -110,7 +110,6 @@ const ROWS: Row[] = [
   ["Oophaga histrionica", "Rana arlecchino", "Dendrobatidae", "Sudamerica", 3.5, "VU", "Mosaico nero su arancio, dipinto in modo diverso per ogni individuo.", "#e07028", "#2a2420", "slim", "mottled"],
   ["Ranitomeya imitator", "Rana imitatrice", "Dendrobatidae", "Sudamerica", 2, "LC", "Copia le livree di tre specie tossiche vicine: mimetismo batesiano puro.", "#e8a020", "#2a2620", "slim", "striped"],
   ["Ranitomeya reticulata", "Rana reticolata", "Dendrobatidae", "Sudamerica", 2, "LC", "Una rete nera finissima su fondo rosso fuoco.", "#d84028", "#2e2820", "slim", "mottled"],
-  ["Minyobates steyermarki", "Minirospo di Steyermark", "Dendrobatidae", "Sudamerica", 1.6, "CR", "Tra i più piccoli anfibi al mondo: vive su un solo tepui venezuelano.", "#c83020", "#2a221e", "round", "plain"],
   ["Andinobates bombetes", "Dendrobate «bombeta»", "Dendrobatidae", "Sudamerica", 2, "VU", "Il richiamo ricorda un petardo: da qui il nome colombiano.", "#d83828", "#2e2820", "slim", "plain"],
   // ——— Mantellidae (Madagascar) ———
   ["Mantella aurantiaca", "Mantella dorata", "Mantellidae", "Madagascar", 3, "EN", "La «freccia d'oro» del Madagascar: minacciata anche dai prelievi.", "#e8a020", "#3a2e18", "slim", "plain"],
