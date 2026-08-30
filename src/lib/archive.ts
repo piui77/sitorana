@@ -81,7 +81,7 @@ const ROWS: Row[] = [
   ["Anaxyrus boreas", "Rospo boreale", "Bufonidae", "Nordamerica", 11, "NT", "In declino sulle Montagne Rocciose, monitorato da decenni.", "#8a7448", "#c8b478", "round", "spotted"],
   ["Anaxyrus canorus", "Rospo di Yosemite", "Bufonidae", "Nordamerica", 7, "VU", "Vive quasi solo nel parco di Yosemite, sopra i 2.500 metri.", "#7a6a3e", "#c8b870", "round", "mottled"],
   ["Rhinella marina", "Rospo delle canne", "Bufonidae", "Sudamerica", 25, "LC", "Introdotto in Australia come «disinfestante»: è diventato un disastro.", "#8a7a50", "#c0b078", "round", "mottled"],
-  ["Atelopus zeteki", "Rana dorata di Panama", "Bufonidae", "America Centrale", 5, "CR", "Simbolo nazionale di Panama, scomparsa quasi ovunque per il chitridio.", "#e8b020", "#3a2e18", "slim", "plain"],
+  ["Atelopus zeteki", "Rana dorata di Panama", "Bufonidae", "America Centrale", 5, "CR", "Non sente il proprio canto: «saluta» i rivali sventolando le zampe. Simbolo di Panama, quasi svanita per il chitridio.", "#e8b020", "#3a2e18", "slim", "plain"],
   ["Atelopus varius", "Arlecchino variabile", "Bufonidae", "America Centrale", 6, "CR", "Un arlecchino in pericolo critico: pochi avvistamenti negli ultimi anni.", "#e0a030", "#403018", "slim", "mottled"],
   ["Incilius periglenes", "Rospo dorato del Monteverde", "Bufonidae", "America Centrale", 6, "EX", "Visto l'ultima volta nel 1989: la prima vittima celebre del clima che cambia.", "#e8a820", "#4a3518", "round", "plain"],
   // ——— Bombinatoridae ———
@@ -170,7 +170,6 @@ const ROWS: Row[] = [
   ["Litoria infrafrenata", "Raganella dal labbro bianco", "Hylidae", "Oceania", 13, "LC", "La raganella più grande del mondo: dieci centimetri di verde squillante con le labbra bianche.", "#58b050", "#e8f0e0", "slim", "plain"],
   ["Rhacophorus nigropalmatus", "Rana volante di Wallace", "Rhacophoridae", "Asia", 10, "NT", "Dita palmate di nero come paracadute: plana da un albero all'altro per dieci metri.", "#5a8a3a", "#1e1e1e", "slim", "plain"],
   ["Hymenochirus boettgeri", "Rana artigliata nana", "Pipidae", "Africa", 4, "LC", "Quattro centimetri, tutta acquatica: le dita terminano in veri artigli neri.", "#8a7a50", "#b0a070", "slim", "plain"],
-  ["Atelopus zeteki", "Rana dorata di Panama", "Bufonidae", "America Centrale", 6, "CR", "Non sente il proprio canto, quindi «saluta» i rivali sventolando le zampe: quasi svanita.", "#e8b818", "#2e2418", "slim", "plain"],
   ["Oreophrynella nigra", "Rospo rotolante dei tepui", "Bufonidae", "Sudamerica", 2, "VU", "Vive sulle cime piatte dei tepui venezuelani: se fugge, si appallottola e rotola giù dai sassi.", "#3a3a32", "#6a6a58", "round", "plain"],
   ["Cyclorana platycephala", "Rana serbatoio", "Hylidae", "Oceania", 6, "LC", "Quando piove si riempie d'acqua e si sigilla sottoterra: gli aborigeni la usavano come borraccia.", "#a89858", "#d0c088", "round", "plain"],
   ["Hemiphractus proboscideus", "Rana marsupiale", "Hemiphractidae", "Sudamerica", 8, "LC", "La femmina porta i girini in una tasca sul dorso, nutriti da uova non fecondate.", "#7a6a40", "#c8a050", "wide", "mottled"],
@@ -212,7 +211,14 @@ const ROWS: Row[] = [
   ["Hemidactylium scutatum", "Salamandra a quattro dita", "Plethodontidae", "Nordamerica", 9, "LC", "Stacca la coda che continua a ballare per distrarre i predatori: ricresce, quasi sempre storta.", "#9a7850", "#c8a878", "caudata", "plain", "Urodela"],
 ];
 
-export const ARCHIVE: ArchiveSpecies[] = ROWS.map((r) => ({
+/* paracadute: se per errore una specie fosse elencata due volte, ne mostriamo una sola */
+const VISTI = new Set<string>();
+
+export const ARCHIVE: ArchiveSpecies[] = ROWS.filter((r) => {
+  if (VISTI.has(r[0])) return false;
+  VISTI.add(r[0]);
+  return true;
+}).map((r) => ({
   latin: r[0],
   name: r[1],
   family: r[2],
