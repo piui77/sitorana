@@ -1,8 +1,11 @@
+import type { Pattern, Scene, Shape } from "./portraits";
+
 export interface Species {
   id: string;
   code: string;
   name: string;
   latin: string;
+  family: string;
   place: string;
   size: string;
   habitat: string;
@@ -10,8 +13,12 @@ export interface Species {
   callId: string;
   callLabel: string;
   note: string;
-  img: string;
-  accent: string;
+  /* livrea per la tavola illustrata (SVG incorporato, nessuna risorsa esterna) */
+  c1: string;
+  c2: string;
+  pattern: Pattern;
+  shape: Shape;
+  scene: Scene;
 }
 
 export const SPECIES: Species[] = [
@@ -20,70 +27,70 @@ export const SPECIES: Species[] = [
     place: "Italia · stagni, fossi, risaie", size: "4–5 cm", habitat: "Zone umide di pianura",
     toxicity: 0, callId: "hyla", callLabel: "Raglio metallico",
     note: "La voce delle sere d'estate in pianura Padana: un crepitio rapido che sembra una motocicletta lontana.",
-    img: "https://image.qwenlm.ai/generated-images/bdc127a9-6307-4d34-9e89-77a77bb27dc7/_result.png", accent: "var(--color-lime)",
+    family: "Hylidae", c1: "#8fb83e", c2: "#405c24", pattern: "striped", shape: "slim", scene: "palude",
   },
   {
     id: "temporaria", code: "SPC-02", name: "Rana temporaria", latin: "Rana temporaria",
     place: "Alpi e Appennini", size: "6–9 cm", habitat: "Boschi umidi e torbiere",
     toxicity: 1, callId: "temporaria", callLabel: "Cra-cra sommesso",
     note: "In primavera scende in massa verso i laghetti alpini: le migrazioni notturne coinvolgono migliaia di individui.",
-    img: "https://image.qwenlm.ai/generated-images/95b038da-87a9-430d-a0d7-520da922e276/_result.png", accent: "var(--color-water)",
+    family: "Ranidae", c1: "#a06a38", c2: "#b06830", pattern: "mottled", shape: "wide", scene: "foresta",
   },
   {
     id: "agalychnis", code: "SPC-03", name: "Rana dagli occhi rossi", latin: "Agalychnis callidryas",
     place: "America centrale", size: "5–7 cm", habitat: "Foresta pluviale",
     toxicity: 2, callId: "agalychnis", callLabel: "Cip acuto",
     note: "I suoi occhi scarlatti sono un \"flash\" di avvertimento: spalancandoli di colpo confonde i predatori notturni.",
-    img: "https://image.qwenlm.ai/generated-images/519eab2c-adf2-4544-9085-7e704e87425d/_result.png", accent: "var(--color-rust)",
+    family: "Phyllomedusidae", c1: "#38a848", c2: "#d83828", pattern: "plain", shape: "slim", scene: "foresta",
   },
   {
     id: "dendrobates", code: "SPC-04", name: "Dendrobate azzurro", latin: "Dendrobates tinctorius «azureus»",
     place: "Suriname · savane sipaliwini", size: "3,5–4,5 cm", habitat: "Lettiera di foresta",
     toxicity: 4, callId: "dendrobates", callLabel: "Ronzio elettrico",
     note: "Il cobalto della pelle è un cartello stradale per i predatori: la tossina arriva dalle formiche e dagli acari che mangia.",
-    img: "https://image.qwenlm.ai/generated-images/e24ec950-e94c-467b-9f05-21487b6e5b1e/_result.png", accent: "var(--color-water)",
+    family: "Dendrobatidae", c1: "#2f5fd0", c2: "#101820", pattern: "spotted", shape: "round", scene: "foresta",
   },
   {
     id: "litoria", code: "SPC-05", name: "Rana verdastra australiana", latin: "Litoria caerulea",
     place: "Australia e Nuova Guinea", size: "fino a 10 cm", habitat: "Giardini, grondaie, serbatoi",
     toxicity: 1, callId: "litoria", callLabel: "Crawk profondo",
     note: "Tranquilla e corpulenta, si è adattata alla città: la si trova nei bagni e nelle cassette della posta.",
-    img: "https://image.qwenlm.ai/generated-images/a4c4ea79-4e63-45b2-b95e-906584958bc5/_result.png", accent: "var(--color-limedeep)",
+    family: "Hylidae", c1: "#4aa858", c2: "#d8b830", pattern: "plain", shape: "round", scene: "giardino",
   },
   {
     id: "phyllobates", code: "SPC-06", name: "Fillopate dorato", latin: "Phyllobates terribilis",
     place: "Colombia · Chocó", size: "4–5 cm", habitat: "Foresta umida costiera",
     toxicity: 5, callId: "phyllobates", callLabel: "Trillo argentino",
     note: "Un solo esemplare custodisce abbastanza batracotossina da uccidere dieci adulti: il vertebrato più velenoso al mondo.",
-    img: "https://image.qwenlm.ai/generated-images/4621bc8d-613f-4dcc-9c34-2177396e9dfa/_result.png", accent: "var(--color-amber)",
+    family: "Dendrobatidae", c1: "#f0b018", c2: "#2e2010", pattern: "plain", shape: "slim", scene: "foresta",
   },
   {
     id: "bombina", code: "SPC-07", name: "Ululone dal ventre giallo", latin: "Bombina variegata",
     place: "Italia · pozze temporanee", size: "3,5–5 cm", habitat: "Pozze effimere, prati allagati",
     toxicity: 2, callId: "bombina", callLabel: "Uu-uu lamentoso",
     note: "Se minacciato inarca la schiena e mostra il ventre giallo e nero: il colore avverte «so di cattivo». Il verso è un «uu… uu…» malinconico che gli dà il nome.",
-    img: "https://image.qwenlm.ai/generated-images/8525c3f6-a586-4192-bc29-a4a4df0875a0/_result.png", accent: "var(--color-amber)",
+    family: "Bombinatoridae", c1: "#6a7a58", c2: "#e8c020", pattern: "mottled", shape: "round", scene: "palude",
   },
   {
     id: "bufo", code: "SPC-08", name: "Rospo comune", latin: "Bufo bufo",
     place: "Europa · giardini e boschi", size: "fino a 15 cm", habitat: "Boschi, orti, cantine umide",
     toxicity: 2, callId: "bufo", callLabel: "Fusa meccaniche",
     note: "Il grande migratore di primavera: nelle notti di pioggia migliaia di rospi attraversano le strade verso gli stagni, spesso scortati dai volontari. Le parotidi secernono una tossina dal sapore pessimo.",
-    img: "https://image.qwenlm.ai/generated-images/174093c8-9eac-4cf4-95a0-df13618f467b/_result.png", accent: "var(--color-rust)",
+    family: "Bufonidae", c1: "#7a6248", c2: "#c07830", pattern: "mottled", shape: "round", scene: "giardino",
   },
   {
     id: "dyscophus", code: "SPC-09", name: "Rana pomodoro", latin: "Dyscophus antongilii",
     place: "Madagascar nord-orientale", size: "6–10 cm", habitat: "Lettiera di foresta pluviale",
     toxicity: 2, callId: "tomato", callLabel: "Cip squillante",
     note: "Una palla rosso pomodoro che si gonfia d'aria quando si spaventa, fino a sembrare impossibile da inghiottire. La pelle secerne una sostanza appiccicosa che scoraggia i predatori.",
-    img: "https://image.qwenlm.ai/generated-images/c6306c57-5e49-4107-b8fd-ccecdd0f26e9/_result.png", accent: "var(--color-rust)",
+    family: "Microhylidae", c1: "#d84830", c2: "#e8c050", pattern: "plain", shape: "round", scene: "foresta",
   },
   {
     id: "pyxicephalus", code: "SPC-10", name: "Rana toro africana", latin: "Pyxicephalus adspersus",
     place: "Africa subsahariana", size: "fino a 24 cm · 2 kg", habitat: "Savane allagate, pozze",
     toxicity: 1, callId: "bullfrog", callLabel: "Muggito profondo",
     note: "Un maschio può pesare due chili e difende i girini come un pastore, scavando canali verso l'acqua. Il suo «jug-o-rum» si sente a chilometri di distanza.",
-    img: "https://image.qwenlm.ai/generated-images/c4ea9551-9061-40c8-9eca-8452eee01137/_result.png", accent: "var(--color-limedeep)",
+    family: "Pyxicephalidae", c1: "#6a7a3a", c2: "#c8d070", pattern: "mottled", shape: "wide", scene: "savana",
   },
 ];
 
