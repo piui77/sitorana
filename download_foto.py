@@ -6,7 +6,9 @@ download_foto.py — Scarica le foto delle specie per l'«Atlante delle Rane».
 CHE COSA FA
 -----------
 1. Legge i nomi latini delle specie dai sorgenti del sito
-   (src/lib/data.ts e src/lib/archive.ts): l'elenco è sempre sincronizzato.
+   (src/lib/data.ts e src/lib/archive.ts): l'elenco è SEMPRE sincronizzato,
+   nuove specie comprese. Se aggiungi una specie al sito, basta rilanciare
+   lo script: scaricherà solo le foto che mancano ancora.
 2. Per ogni specie cerca la foto su DUE FONTI INDIPENDENTI, in ordine:
 
        a) Wikipedia (voce italiana, poi inglese) — foto quasi sempre CC-BY-SA
@@ -36,7 +38,8 @@ Una volta scaricate restano tue anche se Wikipedia o iNaturalist sparissero.
 USO
 ---
     python3 download_foto.py --test       # diagnosi rapida della rete (fallo prima!)
-    python3 download_foto.py              # scarica le foto mancanti
+    python3 download_foto.py              # scarica le foto mancanti (anche le nuove specie!)
+    python3 download_foto.py --solo=axolotl    # prova una singola specie (utile per verificare)
     python3 download_foto.py --forza      # riscarica tutto da capo
     python3 download_foto.py --no-ssl-verify   # se la rete intercetta HTTPS (errori SSL)
 
@@ -174,14 +177,22 @@ def candidati_wikipedia(nome_latino: str):
 # ---------------------------------------------------------------- fonti: iNaturalist
 
 def candidati_inaturalist(nome_latino: str):
-    """(url, licenza) da iNaturalist: foto predefinita del taxon."""
-    q = urllib.parse.urlencode({"q": binomio(nome_latino), "per_page": 5, "is_active": "true"})
-    try:
-        dati = get_json(f"https://api.inaturalist.org/v1/taxa?{q}")
-    except Exception:
-        return []
-
-    risultati = (dati or {}).get("results") or []
+    """(url, licenza) da iNaturalist: foto predefinita del taxon.
+    Due tentativi: prima solo taxa «attivi», poi senza filtro (utile per le
+    specie più particolari o con tassonomia controversa)."""
+    bn = binomio(nome_latino)
+    risultati = []
+    for params in (
+        {"q": bn, "per_page": 5, "is_active": "true"},
+        {"q": bn, "per_page": 5},
+    ):
+        try:
+            dati = get_json(f"https://api.inaturalist.org/v1/taxa?{urllib.parse.urlencode(params)}")
+        except Exception:
+            continue
+        risultati = (dati or {}).get("results") or []
+        if risultati:
+            break
     if not risultati:
         return []
 
@@ -311,10 +322,21 @@ def main() -> int:
         print("! Verifica dei certificati SSL disattivata (solo per reti con proxy ispettivo)\n")
 
     forza = "--forza" in sys.argv
+
+    # --solo=<testo>: limita il giro a una specie (o a quelle che contengono il testo)
+    solo = next((a.split("=", 1)[1].strip().lower() for a in sys.argv[1:] if a.startswith("--solo=")), None)
+
     nomi = raccogli_nomi()
     if not nomi:
         print("Nessun nome latino trovato nei sorgenti: verifica src/lib/data.ts e src/lib/archive.ts.")
         return 1
+
+    if solo:
+        nomi = [n for n in nomi if solo in n.lower()]
+        if not nomi:
+            print(f"Nessuna specie contiene «{solo}» nell'elenco del sito.")
+            return 1
+        print(f"Filtro attivo: solo specie con «{solo}» nel nome ({len(nomi)})\n")
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 
