@@ -142,18 +142,8 @@ export default function PondHero() {
       ))}
 
       {/* contenuto */}
-      <div className="relative z-10 mx-auto max-w-7xl px-5 md:px-10 min-h-[100svh] flex flex-col justify-between py-24 md:py-28">
-        <div className="flex items-start justify-between gap-6">
-          <p className="font-mono text-[11px] md:text-xs tracking-[0.24em] uppercase text-foam/50 max-w-[26ch] leading-relaxed">
-            Diario di campo · zona umida n. 07<br />
-            <span className="text-lime/80">ore 21:47 — il coro accorda gli strumenti</span>
-          </p>
-          <p className="hidden md:block font-mono text-[11px] tracking-[0.2em] uppercase text-foam/40 text-right leading-relaxed">
-            45°27′N · 9°11′E<br />acqua 12 °C · luna gibbosa
-          </p>
-        </div>
-
-        <div className="mt-auto">
+      <div className="relative z-10 mx-auto max-w-7xl px-5 md:px-10 min-h-[100svh] flex flex-col justify-end py-24 md:py-28">
+        <div>
           <p className="font-display italic text-xl md:text-3xl text-water/90 mb-1 md:mb-2">Atlante delle</p>
           <h1 className="font-display italic font-black leading-[0.82] text-foam text-[clamp(5rem,21vw,16.5rem)] tracking-tight">
             {TITLE.map((ch, i) => (

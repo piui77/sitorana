@@ -59,7 +59,7 @@ export default function Archive() {
           index="05"
           kicker="L'archivio"
           title={`${total} anfibi, un solo atlante`}
-          sub={`${nAnura} Anura (rane e rospi) e ${nUrodela} Urodela (salamandre, tritoni, axolotl e altri caudati), con una predilezione per le forme più stravaganti: la rana senza polmoni, quella che rotola giù dai sassi, la sirena con due zampe sole, il tritone con le costole fuori posto. Le foto reali si scaricano dentro il sito con «download_foto.py»; altrimenti ogni specie ha la sua tavola SVG incorporata. Filtra per ordine, regione e stato, ordina per taglia o rischio.`}
+          sub={`${nAnura} Anura (rane e rospi) e ${nUrodela} Urodela (salamandre, tritoni, axolotl e altri caudati), con una predilezione per le forme più stravaganti: la rana senza polmoni, quella che rotola giù dai sassi, la sirena con due zampe sole, il tritone con le costole fuori posto. Ogni ritratto è incorporato nel sito e disegnato sui colori reali della livrea. Filtra per ordine, regione e stato, ordina per taglia o rischio.`}
         />
 
         {/* barra strumenti */}
@@ -266,9 +266,8 @@ export default function Archive() {
         <Reveal delay={100}>
           <div className="mt-10 flex flex-col md:flex-row md:items-center gap-4 border-t border-leaf/40 pt-6">
             <p className="font-mono text-[11px] text-foam/40 leading-relaxed flex-1">
-              Stati di conservazione: categorie <a href="https://www.iucnredlist.org" target="_blank" rel="noreferrer" className="text-water hover:text-lime transition-colors">IUCN Red List</a> (dati indicativi a scopo didattico).
-              Le foto reali si scaricano nel sito con <span className="text-lime">python3 download_foto.py</span> (salvate in public/images/specie, nessuna dipendenza esterna);
-              dove la foto non è ancora stata scaricata il sito mostra la tavola SVG incorporata nel codice.
+              Stati di conservazione: categorie IUCN Red List (dati indicativi a scopo didattico).
+              Ogni ritratto è generato e incorporato nel sito: nessuna risorsa esterna, nessuna dipendenza da server di terze parti.
             </p>
             <div className="flex flex-wrap gap-x-4 gap-y-1.5">
               {STATUS_ORDER.map((s) => (

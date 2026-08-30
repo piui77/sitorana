@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { CALLS, playCall } from "../lib/audio";
 import { SPECIES } from "../lib/data";
+import { ARCHIVE } from "../lib/archive";
 import PlateImage from "./PlateImage";
 import { IconSound, Reveal, SectionHead } from "./ui";
 
@@ -131,25 +132,25 @@ export default function Species() {
           {/* ---- archivio completo ---- */}
           <Reveal delay={180}>
             <a
-              href="https://amphibiaweb.org"
-              target="_blank"
-              rel="noreferrer"
+              href="#archivio"
               className="group h-full flex flex-col justify-between border border-lime/50 bg-lime/[0.05] p-6 transition-colors duration-300 hover:bg-lime"
             >
               <div>
                 <span className="font-mono text-[10px] tracking-[0.22em] uppercase text-lime/90 group-hover:text-ink/70 transition-colors">
-                  Archivio completo
+                  E non finisce qui
                 </span>
                 <p className="mt-4 font-display italic font-black text-5xl md:text-6xl text-foam group-hover:text-ink transition-colors">
-                  ≈6.990
+                  +{ARCHIVE.length}
                 </p>
                 <p className="mt-3 text-sm leading-relaxed text-foam/60 group-hover:text-ink/75 max-w-[26ch] transition-colors">
-                  specie restano da raccontare: l'ordine degli Anura è sterminato.
+                  specie nell'archivio: rane stravaganti e un'intera ala di salamandre e tritoni.
                 </p>
               </div>
               <span className="mt-6 inline-flex items-center gap-2 font-mono text-[11px] tracking-[0.18em] uppercase text-lime group-hover:text-ink transition-colors">
-                Esplora AmphibiaWeb
-                <span aria-hidden className="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-0.5">↗</span>
+                Apri l'archivio
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-300 group-hover:translate-y-0.5" aria-hidden>
+                  <path d="M12 5v14M5 12l7 7 7-7" />
+                </svg>
               </span>
             </a>
           </Reveal>
@@ -159,14 +160,13 @@ export default function Species() {
           <div className="mt-10 flex flex-col md:flex-row md:items-center gap-4">
             <p className="font-mono text-xs text-foam/40 max-w-2xl leading-relaxed flex-1">
               <span className="text-amber">●</span> tossicità: 0 innocua · 5 letale — la scala riguarda le secrezioni cutanee,
-              non il morso: le rane non mordono (quasi) mai. Le tavole sono incorporate nel sito; per le foto reali esegui{" "}
-              <span className="text-lime">python3 download_foto.py</span> e verranno servite dalla cartella del progetto.
+              non il morso: le rane non mordono (quasi) mai.
             </p>
             <a
               href="#archivio"
               className="group shrink-0 inline-flex items-center gap-3 border border-lime/50 px-5 py-3 font-mono text-[11px] tracking-[0.18em] uppercase text-lime transition-colors hover:bg-lime hover:text-ink"
             >
-              L'archivio completo · +102 identikit
+              L'archivio completo · +{ARCHIVE.length} specie
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" className="transition-transform group-hover:translate-y-0.5" aria-hidden>
                 <path d="M12 5v14M5 12l7 7 7-7" />
               </svg>
