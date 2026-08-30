@@ -57,7 +57,7 @@ export function Footer() {
               e il sipario d'acqua si alza da solo.
             </p>
             <p className="mt-6 font-mono text-[11px] tracking-[0.2em] uppercase text-foam/35">
-              162 specie · 2 ordini · nessuna risorsa esterna
+              {SPECIES.length + ARCHIVE.length} specie · 2 ordini · nessuna risorsa esterna
             </p>
           </div>
 
