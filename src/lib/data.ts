@@ -262,6 +262,7 @@ export const NAV = [
   { href: "#anatomia", label: "Anatomia" },
   { href: "#metamorfosi", label: "Metamorfosi" },
   { href: "#specie", label: "Specie" },
+  { href: "#archivio", label: "Archivio" },
   { href: "#coro", label: "Coro notturno" },
   { href: "#conservazione", label: "Conservazione" },
   { href: "#curiosita", label: "Curiosità" },
