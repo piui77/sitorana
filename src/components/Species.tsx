@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { CALLS, playCall } from "../lib/audio";
 import { SPECIES } from "../lib/data";
-import { portraitSrc } from "../lib/portraits";
+import PlateImage from "./PlateImage";
 import { IconSound, Reveal, SectionHead } from "./ui";
 
 export default function Species() {
@@ -30,10 +30,8 @@ export default function Species() {
               <Reveal key={sp.id} delay={(i % 3) * 90}>
                 <article className="card-species group border border-leaf/60 bg-pond/50 overflow-hidden h-full flex flex-col">
                   <div className="relative aspect-[4/5] overflow-hidden">
-                    <img
-                      src={portraitSrc(sp)}
-                      alt={`Tavola di ${sp.name} (${sp.latin})`}
-                      loading="lazy"
+                    <PlateImage
+                      sp={sp}
                       className="anim-kenburns w-full h-full object-cover"
                       style={{ animationDelay: `${-i * 3.1}s` }}
                     />
@@ -161,7 +159,8 @@ export default function Species() {
           <div className="mt-10 flex flex-col md:flex-row md:items-center gap-4">
             <p className="font-mono text-xs text-foam/40 max-w-2xl leading-relaxed flex-1">
               <span className="text-amber">●</span> tossicità: 0 innocua · 5 letale — la scala riguarda le secrezioni cutanee,
-              non il morso: le rane non mordono (quasi) mai.
+              non il morso: le rane non mordono (quasi) mai. Le tavole sono incorporate nel sito; per le foto reali esegui{" "}
+              <span className="text-lime">python3 download_foto.py</span> e verranno servite dalla cartella del progetto.
             </p>
             <a
               href="#archivio"

@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { ARCHIVE, FAMILIES, REGIONS, STATUS_META, STATUS_ORDER, type IUCN } from "../lib/archive";
 import { SPECIES } from "../lib/data";
-import { portraitSrc, sceneFor } from "../lib/portraits";
+import PlateImage from "./PlateImage";
+import { sceneFor } from "../lib/portraits";
 import { Reveal, SectionHead } from "./ui";
 
 /* ---------- filtri ---------- */
@@ -53,7 +54,7 @@ export default function Archive() {
           index="05"
           kicker="L'archivio"
           title="Cento rane, un atlante"
-          sub={`Dieci schede di prima mano più ${ARCHIVE.length} tavole d'autore generate dentro il sito: ogni ritratto è un file SVG incorporato, senza server esterni che possano sparire. Livree, pupille e scene seguono la biologia reale della specie. Filtra per regione e stato di conservazione, ordina per taglia o rischio.`}
+          sub={`Dieci schede di prima mano più ${ARCHIVE.length} ritratti. Le foto reali si scaricano DENTRO il sito con lo script «download_foto.py» (cartella public/images/specie): da quel momento si servono da lì, senza dipendenze esterne. Finché una foto non c'è, al suo posto una tavola illustrata SVG incorporata nel codice, con livrea e dettagli coerenti con la specie. Filtra per regione e stato, ordina per taglia o rischio.`}
         />
 
         {/* barra strumenti */}
@@ -184,14 +185,12 @@ export default function Archive() {
                     >
                       {sp.status}
                     </span>
-                    <img
-                      src={portraitSrc({ ...sp, scene: sceneFor(sp.region, sp.family) })}
-                      alt={`Tavola di ${sp.name} (${sp.latin})`}
-                      loading="lazy"
+                    <PlateImage
+                      sp={{ ...sp, scene: sceneFor(sp.region, sp.family) }}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.06]"
                     />
                     <span className="absolute bottom-1.5 left-1.5 z-10 font-mono text-[8.5px] tracking-[0.14em] uppercase bg-ink/75 text-foam/60 px-1.5 py-0.5">
-                      tavola · svg
+                      foto/tavola · locale
                     </span>
                   </div>
                   <div className="p-3.5 md:p-4 flex flex-col gap-1.5 flex-1">
@@ -235,7 +234,8 @@ export default function Archive() {
           <div className="mt-10 flex flex-col md:flex-row md:items-center gap-4 border-t border-leaf/40 pt-6">
             <p className="font-mono text-[11px] text-foam/40 leading-relaxed flex-1">
               Stati di conservazione: categorie <a href="https://www.iucnredlist.org" target="_blank" rel="noreferrer" className="text-water hover:text-lime transition-colors">IUCN Red List</a> (dati indicativi a scopo didattico).
-              Ogni tavola è un SVG generato dal sito e incorporato nella pagina: nessun collegamento a immagini esterne, nessuna dipendenza da server di terze parti.
+              Le foto reali si scaricano nel sito con <span className="text-lime">python3 download_foto.py</span> (salvate in public/images/specie, nessuna dipendenza esterna);
+              dove la foto non è ancora stata scaricata il sito mostra la tavola SVG incorporata nel codice.
             </p>
             <div className="flex flex-wrap gap-x-4 gap-y-1.5">
               {STATUS_ORDER.map((s) => (
