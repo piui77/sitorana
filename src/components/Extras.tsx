@@ -8,7 +8,7 @@ export function Curiosities() {
     <section id="curiosita" className="relative scroll-mt-24 py-24 md:py-36">
       <div className="mx-auto max-w-7xl px-5 md:px-10">
         <SectionHead
-          index="08"
+          index="09"
           kicker="Marginalia"
           title="Sei note a margine del diario"
           sub="Le cose che si scoprono solo restando fermi a lungo sull'argine: appunti veri, nessun abbellimento."
