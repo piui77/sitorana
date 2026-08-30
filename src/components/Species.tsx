@@ -18,8 +18,8 @@ export default function Species() {
         <SectionHead
           index="04"
           kicker="Schede di campo"
-          title="Sei inquiline dello stagno (e oltre)"
-          sub="Dalla raganella di casa nostra al fillopate dorato: ogni scheda riporta taglia, habitat, tossicità e — premi play — la voce ricostruita in tempo reale."
+          title="Dieci inquiline dello stagno (e oltre)"
+          sub="Dalla raganella di casa nostra alla rana toro africana: ogni scheda riporta taglia, habitat, tossicità e — premi play — la voce ricostruita in tempo reale. In fondo, le voci che non sentiremo più."
         />
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
@@ -89,6 +89,71 @@ export default function Species() {
               </Reveal>
             );
           })}
+
+          {/* ---- in memoriam ---- */}
+          <Reveal delay={90}>
+            <article className="h-full flex flex-col border border-dashed border-leaf/80 bg-ink/70 p-6">
+              <span className="font-mono text-[10px] tracking-[0.22em] uppercase text-foam/35">
+                In memoriam · SPC-†
+              </span>
+              <svg viewBox="0 0 120 80" className="w-28 mt-5 opacity-60" aria-hidden>
+                <defs>
+                  <pattern id="hatch" patternUnits="userSpaceOnUse" width="5" height="5" patternTransform="rotate(45)">
+                    <line x1="0" y1="0" x2="0" y2="5" stroke="#8a9a78" strokeWidth="1.1" />
+                  </pattern>
+                </defs>
+                <path
+                  d="M18,62 C16,44 28,32 44,29 C50,28 53,21 59,18 C65,15 72,18 72,24 C72,28 77,31 82,34 C94,40 100,50 98,58 C96,66 86,70 72,70 L32,70 C24,70 19,68 18,62 Z"
+                  fill="url(#hatch)" stroke="#8a9a78" strokeWidth="1.4"
+                />
+                <circle cx="64" cy="26" r="3" fill="none" stroke="#8a9a78" strokeWidth="1.3" />
+              </svg>
+              <h3 className="mt-4 font-display italic font-bold text-2xl leading-tight text-foam">
+                Le voci perdute
+              </h3>
+              <ul className="mt-3 space-y-2.5 text-sm leading-snug">
+                <li>
+                  <span className="font-mono italic text-water/85">Rheobatrachus silus</span>
+                  <span className="text-foam/40"> · † 1985</span>
+                  <span className="block text-foam/55 text-[13px] mt-0.5">incubava i girini nello stomaco, in Australia</span>
+                </li>
+                <li>
+                  <span className="font-mono italic text-water/85">Incilius periglenes</span>
+                  <span className="text-foam/40"> · † 1989</span>
+                  <span className="block text-foam/55 text-[13px] mt-0.5">il rospo dorato di Monteverde, Costa Rica</span>
+                </li>
+              </ul>
+              <p className="mt-auto pt-5 text-[13px] leading-relaxed text-foam/50 border-t border-leaf/50">
+                Il coro si è già spento per decine di specie. Queste due ricordano che la lista non è teorica.
+              </p>
+            </article>
+          </Reveal>
+
+          {/* ---- archivio completo ---- */}
+          <Reveal delay={180}>
+            <a
+              href="https://amphibiaweb.org"
+              target="_blank"
+              rel="noreferrer"
+              className="group h-full flex flex-col justify-between border border-lime/50 bg-lime/[0.05] p-6 transition-colors duration-300 hover:bg-lime"
+            >
+              <div>
+                <span className="font-mono text-[10px] tracking-[0.22em] uppercase text-lime/90 group-hover:text-ink/70 transition-colors">
+                  Archivio completo
+                </span>
+                <p className="mt-4 font-display italic font-black text-5xl md:text-6xl text-foam group-hover:text-ink transition-colors">
+                  ≈6.990
+                </p>
+                <p className="mt-3 text-sm leading-relaxed text-foam/60 group-hover:text-ink/75 max-w-[26ch] transition-colors">
+                  specie restano da raccontare: l'ordine degli Anura è sterminato.
+                </p>
+              </div>
+              <span className="mt-6 inline-flex items-center gap-2 font-mono text-[11px] tracking-[0.18em] uppercase text-lime group-hover:text-ink transition-colors">
+                Esplora AmphibiaWeb
+                <span aria-hidden className="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-0.5">↗</span>
+              </span>
+            </a>
+          </Reveal>
         </div>
 
         <Reveal delay={120}>

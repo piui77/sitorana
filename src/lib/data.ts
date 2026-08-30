@@ -57,6 +57,34 @@ export const SPECIES: Species[] = [
     note: "Un solo esemplare custodisce abbastanza batracotossina da uccidere dieci adulti: il vertebrato più velenoso al mondo.",
     img: "https://image.qwenlm.ai/generated-images/4621bc8d-613f-4dcc-9c34-2177396e9dfa/_result.png", accent: "var(--color-amber)",
   },
+  {
+    id: "bombina", code: "SPC-07", name: "Ululone dal ventre giallo", latin: "Bombina variegata",
+    place: "Italia · pozze temporanee", size: "3,5–5 cm", habitat: "Pozze effimere, prati allagati",
+    toxicity: 2, callId: "bombina", callLabel: "Uu-uu lamentoso",
+    note: "Se minacciato inarca la schiena e mostra il ventre giallo e nero: il colore avverte «so di cattivo». Il verso è un «uu… uu…» malinconico che gli dà il nome.",
+    img: "https://image.qwenlm.ai/generated-images/8525c3f6-a586-4192-bc29-a4a4df0875a0/_result.png", accent: "var(--color-amber)",
+  },
+  {
+    id: "bufo", code: "SPC-08", name: "Rospo comune", latin: "Bufo bufo",
+    place: "Europa · giardini e boschi", size: "fino a 15 cm", habitat: "Boschi, orti, cantine umide",
+    toxicity: 2, callId: "bufo", callLabel: "Fusa meccaniche",
+    note: "Il grande migratore di primavera: nelle notti di pioggia migliaia di rospi attraversano le strade verso gli stagni, spesso scortati dai volontari. Le parotidi secernono una tossina dal sapore pessimo.",
+    img: "https://image.qwenlm.ai/generated-images/174093c8-9eac-4cf4-95a0-df13618f467b/_result.png", accent: "var(--color-rust)",
+  },
+  {
+    id: "dyscophus", code: "SPC-09", name: "Rana pomodoro", latin: "Dyscophus antongilii",
+    place: "Madagascar nord-orientale", size: "6–10 cm", habitat: "Lettiera di foresta pluviale",
+    toxicity: 2, callId: "tomato", callLabel: "Cip squillante",
+    note: "Una palla rosso pomodoro che si gonfia d'aria quando si spaventa, fino a sembrare impossibile da inghiottire. La pelle secerne una sostanza appiccicosa che scoraggia i predatori.",
+    img: "https://image.qwenlm.ai/generated-images/c6306c57-5e49-4107-b8fd-ccecdd0f26e9/_result.png", accent: "var(--color-rust)",
+  },
+  {
+    id: "pyxicephalus", code: "SPC-10", name: "Rana toro africana", latin: "Pyxicephalus adspersus",
+    place: "Africa subsahariana", size: "fino a 24 cm · 2 kg", habitat: "Savane allagate, pozze",
+    toxicity: 1, callId: "bullfrog", callLabel: "Muggito profondo",
+    note: "Un maschio può pesare due chili e difende i girini come un pastore, scavando canali verso l'acqua. Il suo «jug-o-rum» si sente a chilometri di distanza.",
+    img: "https://image.qwenlm.ai/generated-images/c4ea9551-9061-40c8-9eca-8452eee01137/_result.png", accent: "var(--color-limedeep)",
+  },
 ];
 
 /* ---------- coro notturno (voci europee) ---------- */
@@ -242,5 +270,6 @@ export const NAV = [
 export const MARQUEE = [
   "Hyla intermedia", "Rana temporaria", "Agalychnis callidryas", "Dendrobates tinctorius",
   "Litoria caerulea", "Phyllobates terribilis", "Pelophylax esculentus", "Rana dalmatina",
-  "Bombina variegata", "Alytes obstetricans", "Hyla arborea", "Rana latastei",
+  "Bombina variegata", "Bufo bufo", "Dyscophus antongilii", "Pyxicephalus adspersus",
+  "Alytes obstetricans", "Rana latastei", "Rheobatrachus silus", "Incilius periglenes",
 ];
