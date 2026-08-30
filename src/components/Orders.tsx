@@ -263,9 +263,8 @@ export default function Orders() {
 
         <Reveal delay={140}>
           <p className="mt-10 font-mono text-[11px] text-foam/35 leading-relaxed max-w-2xl">
-            Cifre indicativi: <a href="https://amphibiaweb.org" target="_blank" rel="noreferrer" className="text-water hover:text-lime transition-colors">AmphibiaWeb</a> e{" "}
-            <a href="https://www.iucnredlist.org" target="_blank" rel="noreferrer" className="text-water hover:text-lime transition-colors">IUCN</a> aggiornano
-            il censimento di continuo — circa 150 nuove specie di anfibi vengono descritte ogni anno, quasi tutte rane.
+            Cifre indicative, in continuo aggiornamento: circa 150 nuove specie di anfibi
+            vengono descritte ogni anno, quasi tutte rane.
           </p>
         </Reveal>
       </div>

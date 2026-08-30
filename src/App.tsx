@@ -9,7 +9,8 @@ import Conservation, { Numbers } from "./components/Conservation";
 import Orders from "./components/Orders";
 import { Curiosities, Footer } from "./components/Extras";
 import { FrogLogo, Marquee } from "./components/ui";
-import { MARQUEE, NAV } from "./lib/data";
+import { MARQUEE, NAV, SPECIES } from "./lib/data";
+import { ARCHIVE } from "./lib/archive";
 
 function useScrollUI() {
   const [progress, setProgress] = useState(0);
@@ -65,7 +66,7 @@ export default function App() {
             ))}
           </nav>
           <span className="hidden sm:inline-block font-mono text-[10px] tracking-[0.2em] uppercase border border-leaf/70 text-foam/50 px-3 py-1.5">
-            vol. I · <span className="text-lime">primavera</span>
+            <span className="text-lime">{SPECIES.length + ARCHIVE.length}</span> specie schedate
           </span>
         </div>
       </header>

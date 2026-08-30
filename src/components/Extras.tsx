@@ -1,4 +1,5 @@
-import { CURIOSITA, NAV } from "../lib/data";
+import { CURIOSITA, NAV, SPECIES } from "../lib/data";
+import { ARCHIVE } from "../lib/archive";
 import { FrogLogo, Reveal, SectionHead } from "./ui";
 
 const TILTS = ["-2.5deg", "1.8deg", "-1.2deg", "2.6deg", "-2deg", "1.4deg"];
@@ -48,7 +49,7 @@ export function Footer() {
             <div className="flex items-center gap-3">
               <FrogLogo className="w-10 h-10" />
               <p className="font-display italic font-black text-2xl text-foam">
-                Atlante <span className="text-lime">delle</span> Rane
+                Atlante <span className="text-lime">degli</span> Anfibi
               </p>
             </div>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-foam/55">
@@ -56,7 +57,7 @@ export function Footer() {
               e il sipario d'acqua si alza da solo.
             </p>
             <p className="mt-6 font-mono text-[11px] tracking-[0.2em] uppercase text-foam/35">
-              45°27′N · 9°11′E — registrato al tramonto
+              162 specie · 2 ordini · nessuna risorsa esterna
             </p>
           </div>
 
@@ -74,12 +75,12 @@ export function Footer() {
           </nav>
 
           <div>
-            <p className="font-mono text-[10px] tracking-[0.28em] uppercase text-lime/80 mb-4">Fonti di campo</p>
+            <p className="font-mono text-[10px] tracking-[0.28em] uppercase text-lime/80 mb-4">L'atlante in numeri</p>
             <ul className="flex flex-col gap-2 text-sm text-foam/65">
-              <li><a className="hover:text-lime transition-colors" href="https://www.iucnredlist.org" target="_blank" rel="noreferrer">IUCN Red List ↗</a></li>
-              <li><a className="hover:text-lime transition-colors" href="https://amphibiaweb.org" target="_blank" rel="noreferrer">AmphibiaWeb ↗</a></li>
-              <li><a className="hover:text-lime transition-colors" href="https://www.inaturalist.org" target="_blank" rel="noreferrer">iNaturalist ↗</a></li>
-              <li><a className="hover:text-lime transition-colors" href="https://www.amphibianark.org" target="_blank" rel="noreferrer">Amphibian Ark ↗</a></li>
+              <li><span className="text-foam/90">{SPECIES.length + ARCHIVE.length}</span> specie schedate</li>
+              <li><span className="text-foam/90">{ARCHIVE.filter((s) => s.order === "Anura").length + SPECIES.length}</span> Anura (rane e rospi)</li>
+              <li><span className="text-foam/90">{ARCHIVE.filter((s) => s.order === "Urodela").length}</span> Urodela (salamandre e tritoni)</li>
+              <li><span className="text-foam/90">{new Set([...ARCHIVE.map((s) => s.family)]).size + new Set(SPECIES.map((s) => s.family)).size}</span> famiglie rappresentate</li>
             </ul>
           </div>
         </div>

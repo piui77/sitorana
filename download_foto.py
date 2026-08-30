@@ -39,7 +39,8 @@ USO
 ---
     python3 download_foto.py --test       # diagnosi rapida della rete (fallo prima!)
     python3 download_foto.py              # scarica le foto mancanti (anche le nuove specie!)
-    python3 download_foto.py --solo=axolotl    # prova una singola specie (utile per verificare)
+    python3 download_foto.py --solo=axolotl    # riscarica solo le specie con «axolotl» nel nome
+                                               # (anche se il file esiste già: utile per correggere foto sbagliate)
     python3 download_foto.py --forza      # riscarica tutto da capo
     python3 download_foto.py --no-ssl-verify   # se la rete intercetta HTTPS (errori SSL)
 
@@ -176,10 +177,35 @@ def candidati_wikipedia(nome_latino: str):
 
 # ---------------------------------------------------------------- fonti: iNaturalist
 
+def foto_osservazioni(taxon_id) -> list:
+    """Migliore foto dalle osservazioni di un taxon (fallback quando manca default_photo)."""
+    for grade in ("research", "casual"):
+        q = urllib.parse.urlencode({
+            "taxon_id": taxon_id, "photos": "true", "quality_grade": grade,
+            "per_page": 1, "order_by": "votes",
+        })
+        try:
+            dati = get_json(f"https://api.inaturalist.org/v1/observations?{q}")
+        except Exception:
+            continue
+        risultati = (dati or {}).get("results") or []
+        out = []
+        for oss in risultati:
+            for f in oss.get("photos") or []:
+                base = f.get("url") or ""
+                if base and "/square" in base:
+                    out.append((base.replace("/square", "/large"), "iNaturalist (osservazione)"))
+                    out.append((base.replace("/square", "/original"), "iNaturalist (osservazione)"))
+        if out:
+            return out
+    return []
+
+
 def candidati_inaturalist(nome_latino: str):
-    """(url, licenza) da iNaturalist: foto predefinita del taxon.
-    Due tentativi: prima solo taxa «attivi», poi senza filtro (utile per le
-    specie più particolari o con tassonomia controversa)."""
+    """(url, fonte) da iNaturalist, con tre livelli di ripiego:
+    1) foto predefinita del taxon (taxa «attivi», poi senza filtro);
+    2) ricerca globale del taxon quando il nome non è trovato;
+    3) migliore foto delle osservazioni del taxon (per le specie «orfane» di foto)."""
     bn = binomio(nome_latino)
     risultati = []
     for params in (
@@ -193,21 +219,32 @@ def candidati_inaturalist(nome_latino: str):
         risultati = (dati or {}).get("results") or []
         if risultati:
             break
+
+    if not risultati:
+        try:
+            q = urllib.parse.urlencode({"q": bn, "sources[]": "taxa", "per_page": 3})
+            dati = get_json(f"https://api.inaturalist.org/v1/search?{q}")
+            for r in (dati or {}).get("results") or []:
+                rec = r.get("record") or {}
+                if r.get("type") == "Taxon" and rec.get("id"):
+                    risultati = [rec]
+                    break
+        except Exception:
+            pass
     if not risultati:
         return []
 
     # preferisci il taxon il cui nome combacia col binomio cercato
     scelto = risultati[0]
-    bn = binomio(nome_latino).lower()
     for t in risultati:
-        if (t.get("name") or "").lower() == bn:
+        if (t.get("name") or "").lower() == bn.lower():
             scelto = t
             break
 
     foto = scelto.get("default_photo") or {}
     base = foto.get("url") or ""
     if not base or "/square" not in base:
-        return []
+        return foto_osservazioni(scelto.get("id")) if scelto.get("id") else []
     licenza = foto.get("attribution") or "iNaturalist (vedi licenza sulla pagina della specie)"
     return [
         (base.replace("/square", "/large"), "iNaturalist"),   # ~1024 px
@@ -360,7 +397,9 @@ def main() -> int:
 
     for i, nome in enumerate(nomi, 1):
         s = slug(nome)
-        esistenti = sorted(OUT_DIR.glob(f"{s}.*")) if not forza else []
+        # con --solo (o --forza) si riscarica anche se il file esiste già,
+        # utile per correggere le foto venute male senza rifare tutto il giro
+        esistenti = sorted(OUT_DIR.glob(f"{s}.*")) if not (forza or solo) else []
 
         if esistenti:
             manifest[nome] = manifest.get(nome) or {"src": f"/images/specie/{esistenti[0].name}", "via": "locale"}
