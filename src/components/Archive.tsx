@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ARCHIVE, FAMILIES, REGIONS, STATUS_META, STATUS_ORDER, type ArchiveSpecies, type IUCN } from "../lib/archive";
 import { SPECIES } from "../lib/data";
 import { Reveal, SectionHead } from "./ui";
@@ -30,6 +30,82 @@ function shade(hex: string, amt: number): string {
 }
 function lighten(hex: string, amt: number): string {
   return shade(hex, amt);
+}
+
+/* ---------- foto reali da Wikipedia (salvate in cache locale) ---------- */
+const photoCache = new Map<string, string | null>();
+const inFlight = new Map<string, Promise<string | null>>();
+const LS_KEY = "atlante-rane-foto-v1";
+
+try {
+  const saved = localStorage.getItem(LS_KEY);
+  if (saved) {
+    const obj = JSON.parse(saved) as Record<string, string | null>;
+    for (const [k, v] of Object.entries(obj)) photoCache.set(k, v);
+  }
+} catch {
+  /* cache non disponibile: si riparte da zero */
+}
+
+function persistCache() {
+  try {
+    const obj: Record<string, string | null> = {};
+    photoCache.forEach((v, k) => {
+      obj[k] = v;
+    });
+    localStorage.setItem(LS_KEY, JSON.stringify(obj));
+  } catch {
+    /* noop */
+  }
+}
+
+/* al massimo 4 richieste contemporanee, per non intasare la rete */
+let activeReqs = 0;
+const reqQueue: (() => void)[] = [];
+function withLimit<T>(fn: () => Promise<T>): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const run = () => {
+      activeReqs++;
+      fn().then(resolve, reject).finally(() => {
+        activeReqs--;
+        const next = reqQueue.shift();
+        if (next) next();
+      });
+    };
+    if (activeReqs < 4) run();
+    else reqQueue.push(run);
+  });
+}
+
+async function fetchWikiPhoto(latin: string): Promise<string | null> {
+  const full = latin.trim().replace(/\s+/g, "_");
+  const binomial = latin.trim().split(/\s+/).slice(0, 2).join("_");
+  const titles = [full, binomial].filter((t, i, a) => a.indexOf(t) === i);
+  for (const lang of ["it", "en"]) {
+    for (const title of titles) {
+      try {
+        const r = await fetch(
+          `https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`
+        );
+        if (!r.ok) continue;
+        const d = (await r.json()) as { thumbnail?: { source?: string } };
+        if (d.thumbnail?.source) return d.thumbnail.source;
+      } catch {
+        /* prova il candidato successivo */
+      }
+    }
+  }
+  return null;
+}
+
+/** Carica (una sola volta) la foto di una specie; riusa la promise se già in volo. */
+function loadPhoto(latin: string): Promise<string | null> {
+  let p = inFlight.get(latin);
+  if (!p) {
+    p = withLimit(() => fetchWikiPhoto(latin)).finally(() => inFlight.delete(latin));
+    inFlight.set(latin, p);
+  }
+  return p;
 }
 
 /* ---------- identikit procedurale ---------- */
@@ -147,6 +223,91 @@ function Identikit({ sp }: { sp: ArchiveSpecies }) {
   );
 }
 
+/* ---------- cornice con foto + identikit di riserva ---------- */
+function PhotoFrame({ sp, statusColor, statusLabel }: { sp: ArchiveSpecies; statusColor: string; statusLabel: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [state, setState] = useState<{ src: string | null; status: "idle" | "loading" | "ok" | "fail" }>(() => {
+    const cached = photoCache.get(sp.latin);
+    return cached !== undefined
+      ? { src: cached, status: cached ? "ok" : "fail" }
+      : { src: null, status: "idle" };
+  });
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    if (photoCache.get(sp.latin) !== undefined) return;
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        io.disconnect();
+        setState((s) => (s.status === "idle" ? { ...s, status: "loading" } : s));
+        loadPhoto(sp.latin).then((src) => {
+          photoCache.set(sp.latin, src);
+          persistCache();
+          setState(src ? { src, status: "ok" } : { src: null, status: "fail" });
+        });
+      },
+      { rootMargin: "480px 0px" }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [sp.latin]);
+
+  return (
+    <div
+      ref={ref}
+      className="relative aspect-[4/3] overflow-hidden"
+      style={{ background: `linear-gradient(165deg, ${sp.c1}26 0%, rgba(15,29,20,0) 65%)` }}
+    >
+      <span
+        className="absolute top-2 right-2 z-10 font-mono text-[10px] font-bold tracking-[0.1em] px-1.5 py-0.5 text-ink"
+        style={{ background: statusColor }}
+        title={`${statusLabel} (IUCN)`}
+      >
+        {sp.status}
+      </span>
+
+      {/* identikit: segnaposto durante il caricamento, ritratto definitivo se la foto manca */}
+      <div
+        className={`absolute inset-0 p-1 transition-opacity duration-500 ${loaded ? "opacity-0" : "opacity-100"}`}
+        aria-hidden={loaded}
+      >
+        <Identikit sp={sp} />
+      </div>
+
+      {state.src && (
+        <img
+          src={state.src}
+          alt={`Foto di ${sp.name} (${sp.latin})`}
+          loading="lazy"
+          onLoad={() => setLoaded(true)}
+          onError={() => {
+            photoCache.set(sp.latin, null);
+            setState({ src: null, status: "fail" });
+          }}
+          className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-[1.06] ${
+            loaded ? "opacity-100" : "opacity-0"
+          }`}
+        />
+      )}
+
+      {state.status === "loading" && !loaded && <div className="absolute inset-0 shimmer" aria-hidden />}
+
+      {loaded ? (
+        <span className="absolute bottom-1.5 left-1.5 z-10 font-mono text-[8.5px] tracking-[0.14em] uppercase bg-ink/75 text-foam/60 px-1.5 py-0.5">
+          foto · Wikipedia
+        </span>
+      ) : state.status === "fail" ? (
+        <span className="absolute bottom-1.5 left-1.5 z-10 font-mono text-[8.5px] tracking-[0.14em] uppercase bg-ink/75 text-lime/70 px-1.5 py-0.5">
+          identikit
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
 /* ---------- filtri ---------- */
 type SortKey = "nome" | "taglia" | "rischio";
 
@@ -196,7 +357,7 @@ export default function Archive() {
           index="05"
           kicker="L'archivio"
           title="Cento rane, un atlante"
-          sub={`Dieci schede illustrate più ${ARCHIVE.length} identikit generati dai colori reali delle specie. Filtra per regione e stato di conservazione, ordina per taglia o rischio: il coro è molto più grande di quanto sembri.`}
+          sub={`Dieci schede illustrate più ${ARCHIVE.length} ritratti fotografici recuperati dalle voci di Wikipedia e salvati nella cache del diario. Dove la foto manca, resta l'identikit disegnato sui colori reali della livrea. Filtra per regione e stato di conservazione, ordina per taglia o rischio.`}
         />
 
         {/* barra strumenti */}
@@ -294,8 +455,8 @@ export default function Archive() {
         {/* contatore vivo */}
         <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
           <p className="font-mono text-xs text-foam/50" aria-live="polite">
-            <span className="text-lime font-semibold text-sm">{filtered.length}</span> / {ARCHIVE.length} identikit ·{" "}
-            <span className="text-foam/70">{total} specie nell'atlante</span>
+            <span className="text-lime font-semibold text-sm">{filtered.length}</span> / {ARCHIVE.length} specie in archivio ·{" "}
+            <span className="text-foam/70">{total} nell'atlante</span>
             {FAMILIES.length > 0 && <> · {FAMILIES.length} famiglie</>}
           </p>
           {hasFilters && (
@@ -319,21 +480,7 @@ export default function Archive() {
                   key={sp.latin}
                   className="idk-card group relative border border-leaf/50 bg-deep/60 flex flex-col overflow-hidden transition-all duration-300 hover:border-lime/50 hover:-translate-y-1.5 hover:shadow-[0_22px_44px_-18px_rgba(0,0,0,0.8)]"
                 >
-                  <div
-                    className="relative aspect-[4/3] overflow-hidden"
-                    style={{ background: `linear-gradient(165deg, ${sp.c1}26 0%, rgba(15,29,20,0) 65%)` }}
-                  >
-                    <span
-                      className="absolute top-2 right-2 z-10 font-mono text-[10px] font-bold tracking-[0.1em] px-1.5 py-0.5 text-ink"
-                      style={{ background: meta.color }}
-                      title={`${meta.label} (IUCN)`}
-                    >
-                      {sp.status}
-                    </span>
-                    <div className="absolute inset-0 p-1">
-                      <Identikit sp={sp} />
-                    </div>
-                  </div>
+                  <PhotoFrame sp={sp} statusColor={meta.color} statusLabel={meta.label} />
                   <div className="p-3.5 md:p-4 flex flex-col gap-1.5 flex-1">
                     <h3 className="font-display italic font-bold text-[1.02rem] leading-tight text-foam group-hover:text-lime transition-colors">
                       {sp.name}
@@ -375,7 +522,8 @@ export default function Archive() {
           <div className="mt-10 flex flex-col md:flex-row md:items-center gap-4 border-t border-leaf/40 pt-6">
             <p className="font-mono text-[11px] text-foam/40 leading-relaxed flex-1">
               Stati di conservazione: categorie <a href="https://www.iucnredlist.org" target="_blank" rel="noreferrer" className="text-water hover:text-lime transition-colors">IUCN Red List</a> (dati indicativi a scopo didattico).
-              Identikit generati proceduralmente: i colori seguono la livrea reale, la forma è una caricatura.
+              Le foto sono le miniature delle voci di Wikipedia, salvate in locale dopo il primo passaggio;
+              dove la foto non esiste resta l'identikit disegnato sui colori reali della livrea.
             </p>
             <div className="flex flex-wrap gap-x-4 gap-y-1.5">
               {STATUS_ORDER.map((s) => (
