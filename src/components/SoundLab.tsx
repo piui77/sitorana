@@ -25,7 +25,7 @@ export default function SoundLab() {
       <div aria-hidden className="absolute inset-0 bg-[radial-gradient(70%_60%_at_50%_110%,rgba(183,226,74,0.07)_0%,transparent_70%)]" />
       <div className="relative mx-auto max-w-7xl px-5 md:px-10">
         <SectionHead
-          index="05"
+          index="06"
           kicker="Coro notturno"
           title="Quattro voci, nessuna registrazione"
           sub="Ogni gracidio è sintetizzato nel tuo browser: frequenze, trilli e pause ricalcano il canto reale. Premi un pad, poi lancia il coro completo."

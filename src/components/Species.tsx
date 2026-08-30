@@ -157,10 +157,21 @@ export default function Species() {
         </div>
 
         <Reveal delay={120}>
-          <p className="mt-10 font-mono text-xs text-foam/40 max-w-2xl leading-relaxed">
-            <span className="text-amber">●</span> tossicità: 0 innocua · 5 letale — la scala riguarda le secrezioni cutanee,
-            non il morso: le rane non mordono (quasi) mai.
-          </p>
+          <div className="mt-10 flex flex-col md:flex-row md:items-center gap-4">
+            <p className="font-mono text-xs text-foam/40 max-w-2xl leading-relaxed flex-1">
+              <span className="text-amber">●</span> tossicità: 0 innocua · 5 letale — la scala riguarda le secrezioni cutanee,
+              non il morso: le rane non mordono (quasi) mai.
+            </p>
+            <a
+              href="#archivio"
+              className="group shrink-0 inline-flex items-center gap-3 border border-lime/50 px-5 py-3 font-mono text-[11px] tracking-[0.18em] uppercase text-lime transition-colors hover:bg-lime hover:text-ink"
+            >
+              L'archivio completo · +102 identikit
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" className="transition-transform group-hover:translate-y-0.5" aria-hidden>
+                <path d="M12 5v14M5 12l7 7 7-7" />
+              </svg>
+            </a>
+          </div>
         </Reveal>
       </div>
     </section>

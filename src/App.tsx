@@ -81,6 +81,7 @@ export default function App() {
         <Anatomy />
         <Metamorphosis />
         <Species />
+        <Archive />
         <SoundLab />
         <Numbers />
         <Conservation />
