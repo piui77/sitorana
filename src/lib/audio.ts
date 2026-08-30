@@ -49,6 +49,26 @@ export const CALLS: Record<string, CallConfig> = {
     id: "phyllobates", base: 1720, pulses: 16, pulseDur: 0.034, gap: 0.012, repeats: 2,
     wobbleHz: 60, wobbleDepth: 180, filter: 3400, type: "square", noise: 0.06, gain: 0.18,
   },
+  /* «uu… uu…» lamentoso dell'ululone */
+  bombina: {
+    id: "bombina", base: 392, pulses: 4, pulseDur: 0.3, gap: 0.24, repeats: 2,
+    wobbleHz: 7, wobbleDepth: 12, filter: 1400, type: "triangle", slide: -58, noise: 0.05, gain: 0.7,
+  },
+  /* fusa meccaniche del rospo comune */
+  bufo: {
+    id: "bufo", base: 235, pulses: 10, pulseDur: 0.045, gap: 0.012, repeats: 2,
+    wobbleHz: 22, wobbleDepth: 30, filter: 1200, type: "triangle", slide: -22, noise: 0.12, gain: 0.7,
+  },
+  /* cip squillante della rana pomodoro */
+  tomato: {
+    id: "tomato", base: 920, pulses: 1, pulseDur: 0.11, gap: 0.45, repeats: 3,
+    wobbleHz: 45, wobbleDepth: 60, filter: 2800, type: "sine", slide: -300, noise: 0.05, gain: 0.6,
+  },
+  /* «jug-o-rum» profondo della rana toro */
+  bullfrog: {
+    id: "bullfrog", base: 102, pulses: 2, pulseDur: 0.22, gap: 0.18, repeats: 2,
+    wobbleHz: 12, wobbleDepth: 20, filter: 700, type: "sawtooth", slide: -32, noise: 0.4, gain: 0.85,
+  },
 };
 
 let ctx: AudioContext | null = null;

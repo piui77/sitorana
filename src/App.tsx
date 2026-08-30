@@ -3,6 +3,7 @@ import PondHero from "./components/PondHero";
 import Anatomy from "./components/Anatomy";
 import Metamorphosis from "./components/Metamorphosis";
 import Species from "./components/Species";
+import Archive from "./components/Archive";
 import SoundLab from "./components/SoundLab";
 import Conservation, { Numbers } from "./components/Conservation";
 import { Curiosities, Footer } from "./components/Extras";
@@ -80,6 +81,7 @@ export default function App() {
         <Anatomy />
         <Metamorphosis />
         <Species />
+        <Archive />
         <SoundLab />
         <Numbers />
         <Conservation />
